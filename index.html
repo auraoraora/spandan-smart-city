@@ -1,0 +1,1365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E3B2E">
+<meta property="og:title" content="Spandan">
+<meta property="og:description" content="Your city's pulse: garbage van, water, traffic, air and power for your street, in your language.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Spandan</title>
+<meta name="description" content="Spandan — a neutral smart city app for citizens and city managers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&display=swap">
+<style>
+/* Layout concept: a phone-first "pulse" app. Bottom tab bar on phones, left rail on desktop.
+   Answer-first cards, each with its own mini chart. One deep-green brand surface per screen. */
+:root{
+  --bg:#F2F5EE; --surface:#FFFFFF; --surface2:#E9EFE5; --line:#D5DDD0;
+  --ink:#10281F; --ink2:#42574B; --ink3:#6E8277;
+  --brand:#0E3B2E; --brand2:#17573F; --onbrand:#F1F8F2; --onbrand2:#A7CDB7; --brandline:#2A6350;
+  --leaf:#2B9360; --leafsoft:#DDF1E4; --sun:#E9A21B; --sunsoft:#FBEFCB;
+  --bad:#CB4631; --badsoft:#F8DDD5; --info:#2C75A6; --infosoft:#DAE9F3;
+  --shadow:0 1px 2px rgba(16,40,31,.06),0 10px 28px rgba(16,40,31,.08);
+  --f-display:'Bricolage Grotesque','Noto Sans Devanagari','Noto Sans Tamil','Noto Sans Bengali',system-ui,sans-serif;
+  --f-body:'Figtree','Noto Sans Devanagari','Noto Sans Tamil','Noto Sans Bengali',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --fs:1; --r:20px; --ease:cubic-bezier(.2,.8,.2,1);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0A1612; --surface:#12231C; --surface2:#1A3027; --line:#274237;
+  --ink:#E8F2EB; --ink2:#A8C0B2; --ink3:#7E988B;
+  --brand:#14513C; --brand2:#1D6A4F; --onbrand:#F1F8F2; --onbrand2:#B4D8C3; --brandline:#2F7A5F;
+  --leaf:#4CC084; --leafsoft:#173528; --sun:#F4B83F; --sunsoft:#3A2E10;
+  --bad:#EF7660; --badsoft:#3D1F19; --info:#6CB1E1; --infosoft:#14293A;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0A1612; --surface:#12231C; --surface2:#1A3027; --line:#274237;
+  --ink:#E8F2EB; --ink2:#A8C0B2; --ink3:#7E988B;
+  --brand:#14513C; --brand2:#1D6A4F; --onbrand:#F1F8F2; --onbrand2:#B4D8C3; --brandline:#2F7A5F;
+  --leaf:#4CC084; --leafsoft:#173528; --sun:#F4B83F; --sunsoft:#3A2E10;
+  --bad:#EF7660; --badsoft:#3D1F19; --info:#6CB1E1; --infosoft:#14293A;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35); color-scheme:dark}
+
+*,*::before,*::after{box-sizing:border-box}
+html{font-size:calc(15px * var(--fs));-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  overflow-x:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+input,textarea,select{font:inherit;color:inherit}
+h1,h2,h3,h4,p{margin:0}
+svg{display:block;max-width:100%}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px;border-radius:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- Shell ---------- */
+#shell{min-height:100%;display:block}
+.side{display:none}
+.main{min-width:0;max-width:1100px;margin:0 auto;padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+@media(min-width:1000px){
+  #shell{display:grid;grid-template-columns:240px minmax(0,1fr);gap:32px;max-width:1440px;margin:0 auto}
+  .side{display:flex;flex-direction:column;gap:6px;position:sticky;top:0;align-self:start;height:100vh;padding:28px 0}
+  .main{padding-bottom:64px;width:100%}
+  .tabbar{display:none!important}
+}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;display:flex;align-items:center;gap:8px;padding:12px 0;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.top .brandmark{display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-weight:800;font-size:1.25rem;letter-spacing:-.01em}
+.top .spacer{flex:1}
+.page{animation:pageIn .5s var(--ease) both}
+@keyframes pageIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.stack{display:flex;flex-direction:column;gap:16px}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:16px}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px}
+.row{display:flex;align-items:center;gap:10px;min-width:0}
+.row.wrap{flex-wrap:wrap}
+.between{justify-content:space-between}
+.grow{flex:1;min-width:0}
+
+/* ---------- Side rail + tab bar ---------- */
+.side .logo{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;font-size:1.5rem;margin-bottom:18px}
+.navbtn{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;font-weight:600;color:var(--ink2);text-align:left;width:100%;transition:background .2s,color .2s}
+.navbtn:hover{background:var(--surface2)}
+.navbtn[aria-current="page"]{background:var(--brand);color:var(--onbrand)}
+.navbtn svg{width:22px;height:22px;flex:none}
+.side .cityfoot{margin-top:auto;padding:14px;border-radius:16px;background:var(--surface);box-shadow:var(--shadow);font-size:.85rem}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;justify-content:space-around;gap:2px;
+  padding:8px max(10px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px));
+  background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line)}
+.tabbar .navbtn{flex-direction:column;gap:3px;padding:7px 4px;font-size:.68rem;text-align:center;justify-content:center;flex:1;min-width:0;border-radius:12px}
+.tabbar .navbtn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tabbar .navbtn[aria-current="page"]{background:var(--leafsoft);color:var(--brand)}
+:root[data-theme="dark"] .tabbar .navbtn[aria-current="page"]{color:var(--leaf)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .tabbar .navbtn[aria-current="page"]{color:var(--leaf)}}
+
+/* ---------- Primitives ---------- */
+.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:18px;min-width:0}
+.card.flat{box-shadow:none;border:1px solid var(--line)}
+.card.brand{background:var(--brand);color:var(--onbrand);position:relative;overflow:hidden}
+.card.brand .muted{color:var(--onbrand2)}
+.card.sun{background:var(--sunsoft)}
+.card.bad{background:var(--badsoft)}
+.h1{font-family:var(--f-display);font-weight:800;font-size:clamp(2rem,7.4vw,3.4rem);line-height:1.02;letter-spacing:-.02em;text-wrap:balance}
+.h2{font-family:var(--f-display);font-weight:700;font-size:1.3rem;letter-spacing:-.01em;text-wrap:balance}
+.h3{font-family:var(--f-display);font-weight:700;font-size:1.05rem;text-wrap:balance}
+.big{font-family:var(--f-display);font-weight:800;font-size:2.6rem;line-height:1;letter-spacing:-.02em}
+.muted{color:var(--ink2)}
+.faint{color:var(--ink3)}
+.cap{font-size:.85rem;color:var(--ink2);margin-top:8px;text-wrap:pretty}
+.src{font-size:.72rem;color:var(--ink3);margin-top:8px;display:flex;align-items:center;gap:6px}
+.src::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--leaf);flex:none}
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.card.brand .eyebrow{color:var(--onbrand2)}
+.sechead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:10px 0 -2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 18px;border-radius:999px;font-weight:700;
+  background:var(--surface2);color:var(--ink);transition:transform .15s var(--ease),background .2s,box-shadow .2s;text-align:center}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--brand);color:var(--onbrand)}
+.btn.sun{background:var(--sun);color:#2A1D00}
+.btn.leaf{background:var(--leaf);color:#04210F}
+.btn.ghost{background:transparent;border:1.5px solid var(--line)}
+.btn.onbrand{background:var(--onbrand);color:var(--brand)}
+.btn.danger{background:var(--badsoft);color:var(--bad)}
+.btn.sm{min-height:36px;padding:6px 14px;font-size:.85rem}
+.btn.full{width:100%}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.icobtn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--surface);box-shadow:var(--shadow);position:relative;flex:none}
+.icobtn svg{width:20px;height:20px}
+.icobtn .dot{position:absolute;top:9px;right:10px;width:9px;height:9px;border-radius:50%;background:var(--bad);border:2px solid var(--surface)}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:5px 13px;border-radius:999px;background:var(--surface2);font-size:.85rem;font-weight:600;color:var(--ink2);white-space:nowrap}
+.chip[aria-pressed="true"],.chip.on{background:var(--brand);color:var(--onbrand)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:700}
+.pill.good{background:var(--leafsoft);color:var(--leaf)}
+.pill.warn{background:var(--sunsoft);color:var(--sun)}
+.pill.bad{background:var(--badsoft);color:var(--bad)}
+.pill.info{background:var(--infosoft);color:var(--info)}
+.pill.mute{background:var(--surface2);color:var(--ink2)}
+.seg{display:flex;background:var(--surface2);border-radius:999px;padding:4px;gap:2px}
+.seg button{flex:1;padding:8px 12px;border-radius:999px;font-weight:700;font-size:.88rem;color:var(--ink2);white-space:nowrap;transition:background .2s,color .2s}
+.seg button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.field{width:100%;min-height:48px;padding:12px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);outline:none;transition:border-color .2s}
+.field:focus{border-color:var(--leaf)}
+textarea.field{min-height:92px;resize:vertical}
+.divider{height:1px;background:var(--line);margin:4px 0}
+.squiggle{display:block;width:150px;height:14px;margin-top:6px;color:var(--sun)}
+.squiggle path{stroke-dasharray:240;stroke-dashoffset:240;animation:draw 1.3s .3s var(--ease) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.live{width:8px;height:8px;border-radius:50%;background:var(--leaf);box-shadow:0 0 0 0 var(--leaf);animation:beat 1.6s infinite}
+@keyframes beat{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--leaf) 60%,transparent)}70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.squiggle path{stroke-dashoffset:0}}
+
+/* ---------- Charts & maps ---------- */
+.chart text{font-family:var(--f-body);fill:var(--ink2);font-size:10px}
+.chart .t-strong{fill:var(--ink);font-weight:700}
+.chart .t-on{fill:var(--onbrand)}
+.chart .t-on2{fill:var(--onbrand2)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.s-leaf{stroke:var(--leaf)}.s-sun{stroke:var(--sun)}.s-bad{stroke:var(--bad)}.s-info{stroke:var(--info)}.s-ink{stroke:var(--ink)}.s-ink3{stroke:var(--ink3)}.s-on{stroke:var(--onbrand)}.s-line{stroke:var(--line)}
+.f-leaf{fill:var(--leaf)}.f-sun{fill:var(--sun)}.f-bad{fill:var(--bad)}.f-info{fill:var(--info)}.f-ink{fill:var(--ink)}.f-line{fill:var(--line)}.f-surface{fill:var(--surface)}.f-surface2{fill:var(--surface2)}.f-brand{fill:var(--brand)}.f-on{fill:var(--onbrand)}.f-ink3{fill:var(--ink3)}
+.draw{stroke-dasharray:var(--len,600);stroke-dashoffset:var(--len,600);animation:draw 1.4s .1s var(--ease) forwards}
+.grow-y{transform-origin:50% 100%;animation:growY .8s var(--ease) both}
+@keyframes growY{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.tile{display:flex;flex-direction:column;gap:6px;text-align:left;width:100%;cursor:pointer;transition:transform .2s var(--ease),box-shadow .2s}
+.tile:hover{transform:translateY(-2px)}
+.tile .tv{font-family:var(--f-display);font-weight:800;font-size:1.7rem;line-height:1}
+.tile.off{opacity:.7;cursor:default}
+.tile.off:hover{transform:none}
+.mapwrap{position:relative;border-radius:16px;overflow:hidden;background:var(--surface2);border:1px solid var(--line)}
+.mapwrap svg{width:100%;height:auto}
+.mapwrap .pin{cursor:pointer;transition:transform .2s var(--ease);transform-box:fill-box;transform-origin:center}
+.mapwrap .pin:hover,.mapwrap .pin.hot{transform:scale(1.25)}
+.pulse-ring{transform-box:fill-box;transform-origin:center;animation:ring 2s infinite}
+@keyframes ring{0%{transform:scale(.6);opacity:.8}100%{transform:scale(2.4);opacity:0}}
+.maplinks{position:absolute;right:8px;bottom:8px;display:flex;gap:6px}
+.maplinks a{font-size:.72rem;font-weight:700;padding:5px 10px;border-radius:999px;background:var(--surface);color:var(--ink);text-decoration:none;box-shadow:var(--shadow)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.75rem;color:var(--ink2);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.numpin{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.8rem;color:#fff;flex:none}
+.nb-fix{background:var(--leaf)}.nb-doing{background:var(--sun);color:#2A1D00}.nb-new{background:var(--bad)}.nb-event{background:var(--info)}
+.meter{display:flex;gap:3px}.meter i{width:14px;height:8px;border-radius:3px;background:var(--line)}
+.meter.l1 i:nth-child(1){background:var(--leaf)}
+.meter.l2 i:nth-child(-n+2){background:var(--sun)}
+.meter.l3 i{background:var(--bad)}
+.bar{height:8px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:99px;background:var(--leaf);transition:width .8s var(--ease)}
+.bar.sun>i{background:var(--sun)}.bar.bad>i{background:var(--bad)}.bar.info>i{background:var(--info)}
+.card.brand .bar{background:var(--brandline)}
+.card.brand .bar>i{background:var(--sun)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;max-width:300px}
+.cal i{aspect-ratio:1;border-radius:50%;background:var(--brandline);display:block}
+.cal i.ok{background:var(--sun)}.cal i.today{box-shadow:0 0 0 2px var(--onbrand)}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);min-width:0}
+.li:last-child{border-bottom:0}
+.li .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--surface2);flex:none}
+.li .ic svg{width:20px;height:20px}
+.li .time{font-family:var(--f-display);font-weight:700;font-size:.95rem;min-width:62px;text-align:right}
+.check{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;flex:none;transition:all .2s}
+.check.on{background:var(--leaf);border-color:var(--leaf);color:#04210F}
+.check svg{width:16px;height:16px;opacity:0}.check.on svg{opacity:1}
+.bin{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;font-weight:800;font-size:.9rem}
+.bin::before{content:"";width:12px;height:12px;border-radius:3px;background:currentColor}
+.bin.green{background:#D9F2DF;color:#13693A}.bin.blue{background:#D8E8F7;color:#1E5C99}.bin.red{background:#F8DAD4;color:#B03621}.bin.black{background:#E3E3E3;color:#2B2B2B}
+:root[data-theme="dark"] .bin.green{background:#173F29;color:#6FDD9F}:root[data-theme="dark"] .bin.blue{background:#16314B;color:#7FBEF0}:root[data-theme="dark"] .bin.red{background:#43211B;color:#F3917D}:root[data-theme="dark"] .bin.black{background:#2C2C2C;color:#D8D8D8}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .bin.green{background:#173F29;color:#6FDD9F}:root:not([data-theme="light"]) .bin.blue{background:#16314B;color:#7FBEF0}:root:not([data-theme="light"]) .bin.red{background:#43211B;color:#F3917D}:root:not([data-theme="light"]) .bin.black{background:#2C2C2C;color:#D8D8D8}}
+
+/* ---------- Community posts ---------- */
+.post{display:flex;flex-direction:column;gap:10px}
+.post .acts{display:flex;gap:6px;flex-wrap:wrap}
+.act{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:6px 12px;border-radius:999px;background:var(--surface2);font-weight:700;font-size:.85rem;color:var(--ink2);transition:all .2s var(--ease)}
+.act svg{width:17px;height:17px}
+.act.on{background:var(--leafsoft);color:var(--leaf)}
+.act:active{transform:scale(.94)}
+.track{display:flex;align-items:flex-start;gap:0;margin:6px 0}
+.track .st{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;text-align:center;font-size:.68rem;color:var(--ink3);font-weight:600}
+.track .st::before{content:"";position:absolute;top:10px;left:-50%;width:100%;height:3px;background:var(--line);z-index:0}
+.track .st:first-child::before{display:none}
+.track .st i{width:22px;height:22px;border-radius:50%;background:var(--surface2);border:3px solid var(--line);z-index:1;display:block}
+.track .st.done{color:var(--ink)}.track .st.done i{background:var(--leaf);border-color:var(--leaf)}
+.track .st.done::before{background:var(--leaf)}
+.track .st.now i{box-shadow:0 0 0 5px color-mix(in srgb,var(--leaf) 25%,transparent)}
+.cmt{padding:10px 12px;border-radius:14px;background:var(--surface2);font-size:.9rem}
+.cmt b{font-size:.8rem}
+.cmt.city{background:var(--infosoft)}
+.timer{font-variant-numeric:tabular-nums}
+
+/* ---------- Sheets, toast, FAB, chat ---------- */
+.scrim{position:fixed;inset:0;z-index:80;background:rgba(5,20,14,.55);animation:fade .25s both}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{position:fixed;z-index:90;left:50%;bottom:0;width:min(560px,100%);max-height:88%;overflow:auto;transform:translateX(-50%);background:var(--bg);border-radius:26px 26px 0 0;
+  padding:12px max(18px,env(safe-area-inset-left,0px)) calc(22px + env(safe-area-inset-bottom,0px));animation:sheetUp .35s var(--ease) both;box-shadow:0 -20px 60px rgba(0,0,0,.3)}
+@keyframes sheetUp{from{transform:translate(-50%,40px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+.sheet .grab{width:44px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 14px}
+@media(min-width:700px){.sheet{bottom:auto;top:50%;border-radius:26px;max-height:86%;animation:popIn .3s var(--ease) both}@keyframes popIn{from{transform:translate(-50%,-46%);opacity:0}to{transform:translate(-50%,-50%);opacity:1}}.sheet{transform:translate(-50%,-50%)}}
+.toast{position:fixed;z-index:120;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:max-content;max-width:min(440px,calc(100% - 32px));
+  background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:16px;font-weight:600;font-size:.92rem;box-shadow:0 12px 40px rgba(0,0,0,.35);animation:toastIn .35s var(--ease) both;display:flex;gap:12px;align-items:center}
+.toast button{font-weight:800;color:var(--sun);white-space:nowrap}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+.fab{position:fixed;z-index:45;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(92px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;padding:12px 18px 12px 14px;border-radius:999px;
+  background:var(--sun);color:#2A1D00;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,.28);transition:transform .2s var(--ease)}
+.fab:hover{transform:translateY(-2px)}
+.fab svg{width:22px;height:22px}
+@media(min-width:1000px){.fab{bottom:28px;right:32px}}
+.chatlog{display:flex;flex-direction:column;gap:10px;min-height:200px;max-height:46vh;overflow:auto;padding:4px 2px}
+.bub{max-width:88%;padding:10px 14px;border-radius:18px;font-size:.95rem;animation:pageIn .3s var(--ease) both;white-space:pre-line}
+.bub.bot{background:var(--surface);box-shadow:var(--shadow);border-bottom-left-radius:6px;align-self:flex-start}
+.bub.me{background:var(--brand);color:var(--onbrand);border-bottom-right-radius:6px;align-self:flex-end}
+.typing{display:inline-flex;gap:4px}.typing i{width:7px;height:7px;border-radius:50%;background:var(--ink3);animation:bounce 1s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,60%,100%{transform:none}30%{transform:translateY(-5px)}}
+.wave{display:flex;align-items:center;gap:3px;height:36px}.wave i{width:4px;border-radius:3px;background:var(--bad);animation:wv 0.9s infinite ease-in-out}
+@keyframes wv{0%,100%{height:6px}50%{height:30px}}
+.lock{background:linear-gradient(160deg,#16507D,#0E3B2E 70%);color:#fff;border-radius:30px;padding:22px 16px 18px;position:relative;overflow:hidden}
+.lock .clock{font-family:var(--f-display);font-weight:800;font-size:3.6rem;text-align:center;line-height:1}
+.lock .date{text-align:center;opacity:.85;margin-bottom:16px}
+.notif{background:rgba(255,255,255,.17);backdrop-filter:blur(10px);border-radius:18px;padding:12px 14px;margin-top:10px;font-size:.9rem;color:#fff}
+.notif b{display:block;font-size:.8rem;opacity:.85;margin-bottom:2px}
+.notif .nbtn{display:inline-block;margin-top:8px;margin-right:8px;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.9);color:#0E3B2E;font-weight:800;font-size:.8rem}
+.widget{margin-top:12px;background:rgba(255,255,255,.14);border-radius:20px;padding:12px 14px;display:flex;justify-content:space-between;gap:10px}
+
+/* ---------- Welcome / onboarding ---------- */
+#welcome{--w-bg:#0A2F23;--w-ink:#EEF7F0;--w-ink2:#A9CDB9;--w-card:#12463A;--w-line:#2D6B55;--w-sun:#F4B83F;--w-pulse:#7CE3A9;--w-btn:#F1F8F2;--w-btnink:#0A2F23;
+  position:fixed;inset:0;z-index:200;background:radial-gradient(120% 80% at 50% 0%,#14543F 0%,var(--w-bg) 60%);color:var(--w-ink);display:flex;flex-direction:column;
+  padding:max(14px,env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) max(18px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));overflow:auto}
+#welcome[hidden]{display:none}
+.wtop{display:flex;align-items:center;gap:12px;height:44px;flex:none}
+.wpulse{flex:1;height:36px;position:relative}
+.wpulse svg{width:100%;height:100%;overflow:visible}
+.wpulse .track-p{stroke:var(--w-line);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.wpulse .go-p{stroke:var(--w-pulse);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;transition:stroke-dashoffset .9s var(--ease);filter:drop-shadow(0 0 6px rgba(124,227,169,.7))}
+.wskip{font-size:.85rem;font-weight:700;color:var(--w-ink2);padding:8px}
+.wbody{flex:1;display:flex;flex-direction:column;justify-content:center;gap:20px;max-width:620px;width:100%;margin:0 auto;padding:12px 0}
+.wstep{display:none;flex-direction:column;gap:18px;animation:pageIn .55s var(--ease) both}
+.wstep.on{display:flex}
+.wh{font-family:var(--f-display);font-weight:800;font-size:clamp(1.9rem,6.6vw,2.9rem);line-height:1.05;letter-spacing:-.02em;text-wrap:balance}
+.wp{color:var(--w-ink2);font-size:1.05rem}
+.hello{font-family:var(--f-display);font-weight:800;font-size:clamp(3.2rem,15vw,6.2rem);line-height:1;letter-spacing:-.03em;height:1.15em;position:relative}
+.hello span{position:absolute;left:0;opacity:0;transform:translateY(24px);transition:all .7s var(--ease);white-space:nowrap}
+.hello span.on{opacity:1;transform:none}
+.langgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lang{padding:18px 14px;border-radius:20px;background:var(--w-card);border:1.5px solid var(--w-line);text-align:left;color:var(--w-ink);transition:transform .2s var(--ease),border-color .2s,background .2s}
+.lang:hover,.lang:focus-visible{transform:translateY(-3px);border-color:var(--w-pulse)}
+.lang b{display:block;font-family:var(--f-display);font-size:1.7rem;font-weight:800;line-height:1.15}
+.lang small{color:var(--w-ink2);font-size:.82rem}
+.wfield{width:100%;min-height:54px;padding:14px 18px;border-radius:16px;border:1.5px solid var(--w-line);background:rgba(0,0,0,.2);color:var(--w-ink);outline:none;font-size:1.05rem}
+.wfield::placeholder{color:#82A894}
+.wfield:focus{border-color:var(--w-pulse)}
+.wbtn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:12px 24px;border-radius:999px;background:var(--w-btn);color:var(--w-btnink);font-weight:800;font-size:1.05rem;transition:transform .15s var(--ease)}
+.wbtn:active{transform:scale(.97)}
+.wbtn.ghost{background:transparent;border:1.5px solid var(--w-line);color:var(--w-ink)}
+.wbtn.sun{background:var(--w-sun);color:#2A1D00}
+.wbtn[disabled]{opacity:.4;pointer-events:none}
+.citylist{display:flex;flex-direction:column;gap:8px;max-height:36vh;overflow:auto}
+.cityrow{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:16px;background:var(--w-card);border:1.5px solid transparent;text-align:left;color:var(--w-ink);width:100%}
+.cityrow:hover,.cityrow.on{border-color:var(--w-pulse)}
+.cityrow small{color:var(--w-ink2)}
+.provides{display:flex;flex-wrap:wrap;gap:8px}
+.provides span{padding:5px 12px;border-radius:999px;background:rgba(124,227,169,.14);color:var(--w-pulse);font-size:.85rem;font-weight:700}
+.provides span.no{background:rgba(255,255,255,.07);color:#82A894;text-decoration:line-through}
+.wmap{border-radius:20px;overflow:hidden;border:1.5px solid var(--w-line)}
+.wmap svg{width:100%;height:auto}
+.wtiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wtile{padding:16px 12px;border-radius:20px;background:var(--w-card);border:2px solid transparent;display:flex;flex-direction:column;gap:8px;align-items:flex-start;text-align:left;color:var(--w-ink);font-weight:700;min-height:92px;transition:all .2s var(--ease)}
+.wtile svg{width:28px;height:28px;color:var(--w-pulse)}
+.wtile[aria-pressed="true"]{border-color:var(--w-sun);background:#1B5A47}
+.wtile[aria-pressed="true"] svg{color:var(--w-sun)}
+.wopt{display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:18px;background:var(--w-card);border:2px solid transparent;text-align:left;width:100%;color:var(--w-ink)}
+.wopt[aria-pressed="true"]{border-color:var(--w-sun)}
+.wopt b{display:block;font-size:1.05rem}.wopt small{color:var(--w-ink2)}
+.wopt .rad{width:22px;height:22px;border-radius:50%;border:2px solid var(--w-line);flex:none;margin-top:2px}
+.wopt[aria-pressed="true"] .rad{border:7px solid var(--w-sun)}
+.wready{position:relative;min-height:260px}
+.readycard{background:var(--w-card);border-radius:24px;padding:20px;border:1.5px solid var(--w-line);animation:pageIn .8s var(--ease) both;display:flex;flex-direction:column;gap:10px}
+.readycard .li{border-color:var(--w-line)}
+.readycard .li .ic{background:rgba(124,227,169,.14);color:var(--w-pulse)}
+.readycard .time{color:var(--w-ink)}
+.comfort{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:12px 14px;border-radius:16px;background:rgba(0,0,0,.18)}
+.comfort button{padding:7px 14px;border-radius:999px;border:1.5px solid var(--w-line);font-weight:700;color:var(--w-ink)}
+.comfort button[aria-pressed="true"]{background:var(--w-ink);color:var(--w-bg)}
+.bigpulse{position:absolute;left:-20px;right:-20px;top:50%;height:80px;transform:translateY(-50%);pointer-events:none}
+.bigpulse path{fill:none;stroke:var(--w-pulse);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 8px rgba(124,227,169,.8))}
+.mgr-badge{background:var(--sun);color:#2A1D00;font-weight:800;font-size:.7rem;padding:3px 9px;border-radius:99px;letter-spacing:.04em}
+.rank{width:34px;height:34px;border-radius:10px;background:var(--brand);color:var(--onbrand);display:grid;place-items:center;font-family:var(--f-display);font-weight:800;flex:none}
+.kpi{display:flex;flex-direction:column;gap:2px}
+.kpi b{font-family:var(--f-display);font-size:1.9rem;font-weight:800;line-height:1}
+</style>
+<style>
+@keyframes growX{from{transform:scaleX(0);transform-origin:left}to{transform:scaleX(1);transform-origin:left}}
+@keyframes ringIn{from{stroke-dasharray:0 999}}
+@media(min-width:1000px){.mob{display:none!important}}
+@media(max-width:420px){.top .chip{display:none}.top .themebtn{display:none}}
+.li.card.flat{border-bottom:1px solid var(--line)}
+details summary{list-style:none}details summary::-webkit-details-marker{display:none}
+select.field{appearance:auto}
+</style>
+</head>
+<body>
+<section id="welcome" aria-label="Welcome" hidden>
+  <div class="wtop">
+    <div class="wpulse" aria-hidden="true"><svg id="wp-svg" height="36"><path class="track-p" id="wp-track"/><path class="go-p" id="wp-go"/></svg></div>
+    <button class="wskip" id="wskip" type="button">Skip</button>
+  </div>
+  <div class="wbody" id="wbody" aria-live="polite"></div>
+</section>
+
+<div id="shell">
+  <aside class="side" id="side" aria-label="Main"></aside>
+  <div class="main">
+    <header class="top" id="top"></header>
+    <main id="view" tabindex="-1"></main>
+  </div>
+</div>
+<nav class="tabbar" id="tabbar" aria-label="Main"></nav>
+<button class="fab" id="fab" type="button"></button>
+<div id="layer"></div>
+<noscript>Spandan needs JavaScript to run.</noscript>
+<script>
+'use strict';
+/* ====== Core: helpers, state, i18n, icons ====== */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const hash=s=>{let h=2166136261;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
+const rngOf=seed=>{let a=typeof seed==='number'?seed:hash(seed);return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}};
+const pad=n=>String(n).padStart(2,'0');
+const fmtT=m=>{m=((Math.round(m)%1440)+1440)%1440;const h=Math.floor(m/60),mm=m%60;return `${h%12||12}:${pad(mm)} ${h<12?'AM':'PM'}`};
+const nowMin=()=>{const d=new Date();return d.getHours()*60+d.getMinutes()};
+let UID=0;const uid=p=>`${p||'u'}${++UID}`;
+const store={get(k,d){try{const v=localStorage.getItem('spandan.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('spandan.'+k,JSON.stringify(v))}catch(e){}}};
+
+const S=Object.assign({lang:'en',theme:'system',textSize:1,city:'bhopal',area:'',prefs:['move','garbage','water','air'],notif:'morning',quiet:true,
+  onboarded:false,role:'citizen',page:'home',tab:{},mapLayer:'traffic',scoreOpen:false},store.get('state',{}));
+S.role='citizen'; // officer access is always re-entered through the login sheet
+const save=()=>{const{role,page,tab,...rest}=S;store.set('state',rest)};
+
+/* ---------- i18n ---------- */
+const I={en:{},hi:{},ta:{},bn:{}};
+const addI=o=>{for(const l in o)Object.assign(I[l],o[l])};
+const t=(k,v)=>{let s=(I[S.lang]&&I[S.lang][k])??I.en[k]??k;if(v)for(const x in v)s=s.replace(new RegExp('\\{'+x+'\\}','g'),v[x]);return s};
+const L=o=>o==null?'':typeof o==='string'?o:(o[S.lang]??o.en??'');
+const LANGS={en:{name:'English',hello:'Hello',greet:'English'},hi:{name:'हिन्दी',hello:'नमस्ते',greet:'Hindi'},ta:{name:'தமிழ்',hello:'வணக்கம்',greet:'Tamil'},bn:{name:'বাংলা',hello:'নমস্কার',greet:'Bengali'}};
+const FULL_LANGS=['en','hi'];
+
+addI({en:{
+ home:'Home',travel:'Travel',waste:'Waste & Power',report:'Report',future:'Future City',console:'Console',queue:'Queue',mapv:'Map',insights:'Insights',citizenView:'Citizen view',
+ gm:'Good morning',ga:'Good afternoon',ge:'Good evening',yourDay:'Your day',cityScore:'City score',cityNow:'City right now',nearYou:'Near you',aiIns:'AI insights',cleanest:'Cleanest areas',
+ traffic:'Traffic',air:'Air',garbage:'Garbage',power:'Power',water:'Water',events:'Events',safety:'Safety',move:'Getting around',
+ ask:'Ask Spandan',askHint:'Ask in Hindi or English…',send:'Send',notifs:'Notifications',settings:'Make it comfortable',close:'Close',done:'Done',back:'Back',next:'Next',skip:'Skip',
+ source:'Source',notConn:'Not connected yet. Ask your city to share this data.',demo:'Demo',language:'Language',theme:'Theme',textSize:'Text size',city:'City',changeCity:'Change city',
+ light:'Light',dark:'Dark',auto:'Auto',replay:'Replay welcome',officer:'City officer login',openMaps:'Open in Google Maps',
+ yes:'Yes',no:'No',today:'Today',week:'This week',now:'now',viewAll:'See all',
+},hi:{
+ home:'होम',travel:'सफ़र',waste:'कचरा और बिजली',report:'शिकायत',future:'भविष्य का शहर',console:'कंसोल',queue:'कतार',mapv:'नक्शा',insights:'आँकड़े',citizenView:'नागरिक दृश्य',
+ gm:'सुप्रभात',ga:'नमस्कार',ge:'शुभ संध्या',yourDay:'आपका दिन',cityScore:'शहर का स्कोर',cityNow:'शहर अभी',nearYou:'आपके पास',aiIns:'AI सुझाव',cleanest:'सबसे साफ़ इलाके',
+ traffic:'ट्रैफिक',air:'हवा',garbage:'कचरा',power:'बिजली',water:'पानी',events:'कार्यक्रम',safety:'सुरक्षा',move:'आना-जाना',
+ ask:'स्पंदन से पूछें',askHint:'हिंदी या अंग्रेज़ी में पूछें…',send:'भेजें',notifs:'सूचनाएँ',settings:'अपने हिसाब से करें',close:'बंद करें',done:'हो गया',back:'पीछे',next:'आगे',skip:'छोड़ें',
+ source:'स्रोत',notConn:'अभी जुड़ा नहीं है। अपने शहर से यह जानकारी साझा करने को कहें।',demo:'डेमो',language:'भाषा',theme:'थीम',textSize:'अक्षर का आकार',city:'शहर',changeCity:'शहर बदलें',
+ light:'हल्का',dark:'गहरा',auto:'अपने आप',replay:'स्वागत फिर देखें',officer:'नगर अधिकारी लॉगिन',openMaps:'गूगल मैप्स में खोलें',
+ yes:'हाँ',no:'नहीं',today:'आज',week:'इस हफ़्ते',now:'अभी',viewAll:'सब देखें',
+},ta:{
+ home:'முகப்பு',travel:'பயணம்',waste:'குப்பை & மின்சாரம்',report:'புகார்',future:'எதிர்கால நகரம்',gm:'காலை வணக்கம்',ga:'மதிய வணக்கம்',ge:'மாலை வணக்கம்',
+ yourDay:'உங்கள் நாள்',cityScore:'நகர மதிப்பெண்',cityNow:'நகரம் இப்போது',nearYou:'உங்கள் அருகில்',traffic:'போக்குவரத்து',air:'காற்று',garbage:'குப்பை',power:'மின்சாரம்',water:'தண்ணீர்',
+ ask:'ஸ்பந்தனிடம் கேளுங்கள்',language:'மொழி',close:'மூடு',next:'அடுத்து',skip:'தவிர்',
+},bn:{
+ home:'হোম',travel:'যাতায়াত',waste:'আবর্জনা ও বিদ্যুৎ',report:'অভিযোগ',future:'ভবিষ্যতের শহর',gm:'শুভ সকাল',ga:'শুভ অপরাহ্ন',ge:'শুভ সন্ধ্যা',
+ yourDay:'আপনার দিন',cityScore:'শহরের স্কোর',cityNow:'শহর এখন',nearYou:'আপনার কাছে',traffic:'ট্রাফিক',air:'বাতাস',garbage:'আবর্জনা',power:'বিদ্যুৎ',water:'জল',
+ ask:'স্পন্দনকে জিজ্ঞাসা করুন',language:'ভাষা',close:'বন্ধ',next:'পরের',skip:'বাদ দিন',
+}});
+
+/* ---------- icons ---------- */
+const P={
+ home:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',
+ travel:'<circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H16a3.5 3.5 0 0 0 0-7H8a3.5 3.5 0 0 1 0-7h7.5"/>',
+ waste:'<path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>',
+ bolt:'<path d="M13 2L3 14h8l-1 8 10-12h-8z"/>',
+ report:'<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',
+ future:'<path d="M12 22V12"/><path d="M12 12C12 8 9 5 4 5c0 4 3 7 8 7z"/><path d="M12 14c0-3.5 2.5-6 8-6 0 4-3 6.5-8 6z"/>',
+ bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+ sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+ sun:'<circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v2.5M12 20v2.5M4.2 4.2L6 6M18 18l1.8 1.8M1.5 12H4M20 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/>',
+ moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>',
+ mic:'<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/>',
+ camera:'<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+ pin:'<path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+ search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+ pulse:'<path d="M2 12h5l2.5-7 4.5 14 2.5-7H22"/>',
+ car:'<path d="M3 17h18M4 13l2-6h12l2 6v4H4z"/><circle cx="8" cy="17" r="1.6"/><circle cx="16" cy="17" r="1.6"/>',
+ drop:'<path d="M12 2.5S5 10 5 15a7 7 0 0 0 14 0c0-5-7-12.5-7-12.5z"/>',
+ wind:'<path d="M3 8h11a3 3 0 1 0-3-3M3 16h14a3 3 0 1 1-3 3M3 12h17a3 3 0 1 0-3-3"/>',
+ cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+ shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+ chat:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+ up:'<path d="M12 19V5M5 12l7-7 7 7"/>',
+ repost:'<path d="M17 2l4 4-4 4"/><path d="M3 12V10a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 12v2a4 4 0 0 1-4 4H3"/>',
+ share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>',
+ check:'<path d="M20 6L9 17l-5-5"/>',
+ x:'<path d="M18 6L6 18M6 6l12 12"/>',
+ send:'<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',
+ spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',
+ lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+ users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+ bus:'<rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M8 18v3M16 18v3"/>',
+ park:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18z"/>',
+ flag:'<path d="M4 22V4M4 4h13l-2 4 2 4H4"/>',
+ arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+ chev:'<path d="M6 9l6 6 6-6"/>',
+ ext:'<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>',
+ copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+ trash:'<path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/>',
+ table:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>',
+ phone:'<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>',
+};
+const ico=(n,c='')=>`<svg class="${c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]||''}</svg>`;
+const FEEDICON={move:'travel',traffic:'travel',garbage:'waste',water:'drop',air:'wind',power:'bolt',events:'cal',safety:'shield'};
+/* ====== Simulated city data (every city plugs into the same shape) ====== */
+const ALLFEEDS=['move','garbage','water','power','air','events','safety'];
+const CITIES=[
+ {id:'bhopal',n:{en:'Bhopal',hi:'भोपाल',ta:'போபால்',bn:'ভোপাল'},st:'Madhya Pradesh',body:'Bhopal Municipal Corporation',lang:'hi',feeds:['move','garbage','water','power','air','events'],
+  areas:['MP Nagar','Arera Colony','Kolar Road','Habibganj','Shahpura','Old Bhopal'],road:'Kolar Road',aqi:96,score:74,pop:'2.4M',lake:'Upper Lake'},
+ {id:'indore',n:{en:'Indore',hi:'इंदौर',ta:'இந்தூர்',bn:'ইন্দোর'},st:'Madhya Pradesh',body:'Indore Municipal Corporation',lang:'hi',feeds:['move','garbage','water','power','air','events'],
+  areas:['Vijay Nagar','Palasia','Rajwada','Bhawarkua','Saket'],road:'AB Road',aqi:78,score:86,pop:'3.3M',lake:'Sirpur Lake'},
+ {id:'delhi',n:{en:'Delhi',hi:'दिल्ली',ta:'டெல்லி',bn:'দিল্লি'},st:'NCT of Delhi',body:'Municipal Corporation of Delhi',lang:'hi',feeds:['move','water','power','air','events','safety'],
+  areas:['Dwarka','Rohini','Lajpat Nagar','Saket','Karol Bagh'],road:'Ring Road',aqi:214,score:61,pop:'32M',lake:'Yamuna'},
+ {id:'mumbai',n:{en:'Mumbai',hi:'मुंबई',ta:'மும்பை',bn:'মুম্বই'},st:'Maharashtra',body:'Brihanmumbai Municipal Corporation',lang:'en',feeds:['move','water','air','events','safety'],
+  areas:['Andheri','Bandra','Dadar','Powai','Borivali'],road:'Western Express Highway',aqi:118,score:68,pop:'21M',lake:'Arabian Sea'},
+ {id:'bengaluru',n:{en:'Bengaluru',hi:'बेंगलुरु',ta:'பெங்களூரு',bn:'বেঙ্গালুরু'},st:'Karnataka',body:'Greater Bengaluru Authority',lang:'en',feeds:['move','garbage','power','air','events'],
+  areas:['Koramangala','Indiranagar','Whitefield','HSR Layout','Jayanagar'],road:'Outer Ring Road',aqi:72,score:72,pop:'13M',lake:'Ulsoor Lake'},
+ {id:'chennai',n:{en:'Chennai',hi:'चेन्नई',ta:'சென்னை',bn:'চেন্নাই'},st:'Tamil Nadu',body:'Greater Chennai Corporation',lang:'ta',feeds:['move','garbage','water','air','events'],
+  areas:['T Nagar','Adyar','Anna Nagar','Velachery','Tambaram'],road:'OMR',aqi:88,score:70,pop:'11M',lake:'Adyar River'},
+ {id:'kolkata',n:{en:'Kolkata',hi:'कोलकाता',ta:'கொல்கத்தா',bn:'কলকাতা'},st:'West Bengal',body:'Kolkata Municipal Corporation',lang:'bn',feeds:['move','water','power','air','events'],
+  areas:['Salt Lake','Park Street','Howrah','New Town','Behala'],road:'EM Bypass',aqi:152,score:64,pop:'15M',lake:'Hooghly River'},
+ {id:'hyderabad',n:{en:'Hyderabad',hi:'हैदराबाद',ta:'ஹைதராபாத்',bn:'হায়দরাবাদ'},st:'Telangana',body:'Greater Hyderabad Municipal Corporation',lang:'en',feeds:['move','garbage','water','power','air','safety'],
+  areas:['Gachibowli','Madhapur','Banjara Hills','Secunderabad','Kukatpally'],road:'Outer Ring Road',aqi:102,score:71,pop:'10M',lake:'Hussain Sagar'},
+];
+const AREA_HI={'MP Nagar':'एमपी नगर','Arera Colony':'अरेरा कॉलोनी','Kolar Road':'कोलार रोड','Habibganj':'हबीबगंज','Shahpura':'शाहपुरा','Old Bhopal':'पुराना भोपाल','Vijay Nagar':'विजय नगर','Palasia':'पलासिया','Rajwada':'राजवाड़ा','Dwarka':'द्वारका','Rohini':'रोहिणी','Saket':'साकेत','Andheri':'अंधेरी','Bandra':'बांद्रा','Dadar':'दादर','Powai':'पवई'};
+const city=()=>CITIES.find(c=>c.id===S.city)||CITIES[0];
+const cname=c=>L((c||city()).n);
+const areaName=a=>S.lang==='hi'&&AREA_HI[a]?AREA_HI[a]:a;
+const curArea=()=>S.area||city().areas[0];
+const has=f=>city().feeds.includes(f);
+const mapsUrl=(q)=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);
+const wardOf=a=>'Ward '+(1+hash(a)%24);
+const wardPop=a=>26000+hash('p'+a)%34000;
+
+const CAT={
+ pothole:{n:{en:'Pothole',hi:'गड्ढा'},sev:2,days:6,col:'bad'},garbage:{n:{en:'Garbage not picked',hi:'कचरा नहीं उठा'},sev:2,days:1.5,col:'sun'},
+ light:{n:{en:'Street light off',hi:'स्ट्रीट लाइट बंद'},sev:1,days:3,col:'sun'},leak:{n:{en:'Water leak',hi:'पानी का रिसाव'},sev:3,days:1.8,col:'info'},
+ drain:{n:{en:'Blocked drain',hi:'नाली जाम'},sev:3,days:4,col:'bad'},other:{n:{en:'Something else',hi:'कुछ और'},sev:1,days:5,col:'info'}};
+const STAGES=[{en:'Sent',hi:'भेजा'},{en:'Seen by city',hi:'शहर ने देखा'},{en:'Being fixed',hi:'ठीक हो रहा है'},{en:'Fixed',hi:'ठीक हुआ'}];
+const STKEYS=['new','seen','fixing','fixed'];
+
+/* ---------- daily simulation, stable for a given city + area + day ---------- */
+let _sim={k:'',v:null};
+function sim(){
+  const c=city(),a=curArea(),k=c.id+'|'+a+'|'+new Date().toDateString();
+  if(_sim.k===k)return _sim.v;
+  const r=rngOf(k),d=new Date(),H=d.getHours();
+  const shift=r()*.9-.45;
+  const traffic=[...Array(24)].map((_,i)=>Math.round(clamp(14+Math.exp(-((i-(9+shift))**2)/3.2)*68+Math.exp(-((i-(18+shift))**2)/4.4)*80+r()*6,6,98)));
+  const aqiH=[...Array(24)].map((_,i)=>Math.round(clamp(c.aqi*(1+.2*Math.cos((i-3.5)*Math.PI/12))+traffic[i]*.22-12+r()*5,20,480)));
+  const dow=d.getDay(),wk=['S','M','T','W','T','F','S'],days=[];
+  for(let i=6;i>=0;i--){const dd=new Date(d.getTime()-i*864e5),w=dd.getDay();const late=(w===4&&i>0)||(i===0&&w===4&&false);days.push({l:wk[w],late:w===4&&i!==0||(i===3&&!days.some(x=>x.late)&&w!==4&&false),m:0})}
+  // guarantee exactly one late day (Thursday if present in window, else day 4 of 7)
+  let li=days.findIndex((x,i)=>x.late); if(li<0)li=3;
+  days.forEach((x,i)=>{x.late=i===li;x.m=x.late?35:Math.round(r()*7)});
+  const vanMin=560+(hash(a+c.id)%7)*10;
+  const solar=[...Array(24)].map((_,i)=>i<6||i>18?0:Math.round(Math.sin((i-6)/12*Math.PI)*88+r()*6));
+  const you=[...Array(7)].map(()=>+(6+r()*4).toFixed(1)),nb=you.map(v=>+(v+0.8+r()*2.2).toFixed(1));
+  const parts={move:clamp(Math.round(c.score-6+r()*10),30,95),clean:clamp(Math.round(c.score+4+r()*8),30,97),util:clamp(Math.round(c.score-3+r()*9),30,95),air:clamp(Math.round(100-c.aqi/3.2+r()*6),22,96)};
+  const score=Math.round((parts.move+parts.clean+parts.util+parts.air)/4);
+  const wscore=[...Array(7)].map((_,i)=>clamp(score-4+Math.round(i*.6+r()*3),40,98));wscore[6]=score;
+  const ranking=c.areas.map(x=>({a:x,s:clamp(Math.round(c.score+r()*22-8),48,97)})).sort((p,q)=>q.s-p.s);
+  const nowI=clamp(H,0,23);
+  const crowd=[1,2,3,2].map((v,i)=>({no:['12A','7','21C','M4'][i],to:c.areas[(i+2)%c.areas.length],eta:[3+i*2,11+i*3],lvl:((v+hash(k+i))%3)+1}));
+  const park=c.areas.slice(0,4).map((x,i)=>{const cap=[120,80,200,60][i];return{n:x+' '+['Mall','Metro','Market','Hospital'][i],cap,free:Math.round(cap*(.1+r()*.7))}});
+  const chg=c.areas.slice(1,4).map((x,i)=>({n:x+' EV hub',of:[6,4,8][i],free:Math.round(r()*[6,4,8][i])}));
+  const cuts=[{s:840+(hash(a)%3)*30,e:900+(hash(a)%3)*30,why:{en:'Line maintenance',hi:'लाइन की मरम्मत'}}];
+  const waterS=360+(hash(a+'w')%4)*15;
+  const events=[
+    {n:{en:c.n.en+' Utsav Mela',hi:(c.n.hi||c.n.en)+' उत्सव मेला'},when:{en:'Sat · 5 PM',hi:'शनि · शाम 5 बजे'},at:c.areas[0]},
+    {n:{en:(c.lake||'Lake')+' clean-up drive',hi:'सफ़ाई अभियान'},when:{en:'Sun · 7 AM',hi:'रवि · सुबह 7 बजे'},at:c.areas[1%c.areas.length]},
+    {n:{en:'Organic farmers haat',hi:'जैविक किसान हाट'},when:{en:'Wed · 8 AM',hi:'बुध · सुबह 8 बजे'},at:c.areas[2%c.areas.length]}];
+  const fix=[['garbage',1.6],['leak',1.9],['light',3.1],['drain',4.2],['other',5.0],['pothole',6.3]].map(([k,v])=>({k,d:+(v+(r()-.5)*.6).toFixed(1)}));
+  const v={traffic,aqiH,days,vanMin,solar,you,nb,parts,score,wscore,ranking,nowI,crowd,park,chg,cuts,waterS,events,fix,
+    aqi:aqiH[nowI],solarNow:Math.max(solar[nowI],0)||0,solarShare:31,
+    dest:[{k:'Composted',v:38},{k:'Recycled',v:22},{k:'Waste-to-energy',v:18},{k:'Landfill',v:22}],
+    streak:[...Array(21)].map((_,i)=>i>=2&&r()>.12)};
+  _sim={k,v};return v;
+}
+const aqiInfo=v=>v<=50?{k:'good',en:'Good',hi:'अच्छी',c:'good'}:v<=100?{k:'ok',en:'Fair',hi:'ठीक-ठाक',c:'good'}:v<=150?{k:'mod',en:'Poor for kids & elders',hi:'बच्चों-बुज़ुर्गों के लिए ख़राब',c:'warn'}:v<=200?{k:'bad',en:'Unhealthy',hi:'ख़राब',c:'bad'}:{k:'vbad',en:'Very unhealthy',hi:'बहुत ख़राब',c:'bad'};
+function leaveAt(){
+  const D=sim(),base=22,tt=m=>base*(1+(D.traffic[clamp(Math.floor(m/60),0,23)]/100)*1.15);
+  let best=450;for(let m=450;m<=520;m+=5){if(m+tt(m)<=540)best=m}
+  return{dep:best,arr:Math.round(best+tt(best)),base:Math.round(tt(520)),mine:Math.round(tt(best)),saved:Math.max(4,Math.round(tt(520)-tt(best)))};
+}
+
+/* ---------- community reports (live in memory for this session) ---------- */
+const NAMES=['Asha','Rahul','Imran','Priya','Kavita','Manoj','Sneha','Tarun','Farah','Deepak'];
+const TITLES={pothole:{en:'Deep pothole near {a} market',hi:'{a} बाज़ार के पास गहरा गड्ढा'},garbage:{en:'Garbage not picked for 2 days in {a}',hi:'{a} में 2 दिन से कचरा नहीं उठा'},
+ light:{en:'Street lights off on {a} main road',hi:'{a} मुख्य सड़क पर लाइटें बंद'},leak:{en:'Water pipe leaking at {a} crossing',hi:'{a} चौराहे पर पाइप लीक'},
+ drain:{en:'Drain overflowing near {a} school',hi:'{a} स्कूल के पास नाली उफान पर'},other:{en:'Fallen tree blocking lane in {a}',hi:'{a} में पेड़ गिरा, गली बंद'}};
+let R=[],_rcity='';
+function reports(){
+  if(_rcity===S.city&&R.length)return R;
+  _rcity=S.city;const c=city(),r=rngOf('rep'+c.id),now=Date.now();R=[];
+  const cats=Object.keys(CAT),cfg=[[23.2,'drain',3],[5,'leak',1],[12,'pothole',2],[30,'garbage',3],[2,'light',0],[44,'pothole',2],[8,'garbage',1],[19,'drain',0],[52,'leak',3],[27,'light',3],[3,'other',0]];
+  cfg.forEach(([ageH,cat,st],i)=>{
+    const a=c.areas[i%c.areas.length],created=now-ageH*3600e3;
+    const closes=st===3?now-3600e3:created+24*3600e3;
+    R.push({id:'SP-'+(2040+i),cat,area:a,title:{en:TITLES[cat].en.replace('{a}',a),hi:TITLES[cat].hi.replace('{a}',AREA_HI[a]||a)},
+      x:30+Math.round(r()*340),y:28+Math.round(r()*200),votes:Math.round(18+r()*(i<4?380:120)),upv:false,st,created,closes,reposts:Math.round(r()*14),rep:false,
+      by:NAMES[(i*3)%NAMES.length],mine:false,cm:[{w:NAMES[(i+2)%10],t:{en:'Same problem here since last week.',hi:'यहाँ भी पिछले हफ़्ते से यही दिक्कत है।'},ts:created+2*3600e3}],
+      upd:st>0?[{en:'Complaint seen by '+c.body+'.',hi:'शिकायत '+c.body+' ने देखी।'}]:[],after:st===3,removed:false,note:''});
+  });
+  // two reports filed by the signed-in citizen, for the My reports tab
+  [[6,'garbage',2],[70,'light',3]].forEach(([ageH,cat,st],j)=>{
+    const a=curArea(),created=now-ageH*3600e3;
+    R.push({id:'SP-'+(2101+j),cat,area:a,title:{en:TITLES[cat].en.replace('{a}',a),hi:TITLES[cat].hi.replace('{a}',AREA_HI[a]||a)},x:150+j*70,y:110+j*30,votes:9+j*21,upv:false,
+      st,created,closes:st===3?now-3600e3:created+24*3600e3,reposts:1,rep:false,by:'You',mine:true,cm:[],
+      upd:[{en:'Complaint seen by '+c.body+'.',hi:'शिकायत '+c.body+' ने देखी।'}].concat(st>1?[{en:'A crew has been assigned.',hi:'टीम भेज दी गई है।'}]:[]).concat(st>2?[{en:'Fixed. Thank you for reporting.',hi:'ठीक हो गया। बताने के लिए धन्यवाद।'}]:[]),after:st===3,removed:false,note:''});
+  });
+  return R;
+}
+const live=()=>reports().filter(r=>!r.removed);
+const SEVW=k=>CAT[k].sev;
+function priority(r){const per10k=r.votes/wardPop(r.area)*10000,age=(Date.now()-r.created)/864e5;return per10k*SEVW(r.cat)*(1+Math.min(age,10)*.08)}
+function queue(){return live().filter(r=>r.st<3).sort((a,b)=>priority(b)-priority(a))}
+const commentsOpen=r=>r.st<3&&Date.now()<r.closes;
+function fmtLeft(ms){if(ms<=0)return '0m';const m=Math.floor(ms/60000),h=Math.floor(m/60);return h>0?`${h}h ${pad(m%60)}m`:`${m}m ${pad(Math.floor(ms/1000)%60)}s`}
+function ago(ts){const m=Math.max(1,Math.round((Date.now()-ts)/60000));return m<60?`${m}m`:m<1440?`${Math.round(m/60)}h`:`${Math.round(m/1440)}d`}
+/* ====== Charts: plain SVG, labels written on the chart, no legends ====== */
+const arcPt=(cx,cy,r,v,max)=>{const th=Math.PI-Math.PI*clamp(v,0,max)/max;return[cx+r*Math.cos(th),cy-r*Math.sin(th)]};
+const arcPath=(cx,cy,r,v1,v2,max)=>{const a=arcPt(cx,cy,r,v1,max),b=arcPt(cx,cy,r,v2,max);return`M${a[0].toFixed(1)} ${a[1].toFixed(1)}A${r} ${r} 0 0 1 ${b[0].toFixed(1)} ${b[1].toFixed(1)}`};
+
+function chLine(vals,{nowI=-1,w=220,h=96,from=6,to=22,peak=true,cls='leaf',hi=null}={}){
+  const id=uid('g'),n=vals.length,sl=vals.slice(from,to+1),mx=Math.max(...sl,1),L0=14,R0=8,T0=18,B0=20;
+  const X=i=>L0+(i-from)/(to-from)*(w-L0-R0),Y=v=>T0+(1-v/Math.max(mx*1.1,1))*(h-T0-B0);
+  let d='';for(let i=from;i<=to;i++)d+=(i===from?'M':'L')+X(i).toFixed(1)+' '+Y(vals[i]).toFixed(1);
+  const area=d+`L${X(to)} ${h-B0}L${X(from)} ${h-B0}Z`;
+  const pk=sl.indexOf(mx)+from;
+  let s=`<svg class="chart" viewBox="0 0 ${w} ${h}" role="img"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--${cls});stop-opacity:.35"/><stop offset="1" style="stop-color:var(--${cls});stop-opacity:0"/></linearGradient></defs>`;
+  s+=`<line class="grid" x1="${L0}" x2="${w-R0}" y1="${h-B0}" y2="${h-B0}"/>`;
+  s+=`<path d="${area}" fill="url(#${id})"/><path class="draw s-${cls}" style="--len:${w*2}" d="${d}" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`;
+  [6,12,18].filter(x=>x>=from&&x<=to).forEach(hh=>s+=`<text x="${X(hh)}" y="${h-6}" text-anchor="middle">${hh===12?'12 PM':(hh%12)+(hh<12?' AM':' PM')}</text>`);
+  if(peak)s+=`<text x="${clamp(X(pk),30,w-30)}" y="${Y(mx)-6}" text-anchor="middle" class="t-strong">${S.lang==='hi'?'भीड़ सबसे ज़्यादा':'Busiest'}</text>`;
+  if(nowI>=from&&nowI<=to){const x=X(nowI),y=Y(vals[nowI]);s+=`<line x1="${x}" x2="${x}" y1="${T0-4}" y2="${h-B0}" class="s-ink3" stroke-dasharray="3 3"/><circle cx="${x}" cy="${y}" r="5" class="f-ink"/><circle cx="${x}" cy="${y}" r="9" fill="none" class="s-ink pulse-ring" stroke-width="1.5"/><text x="${clamp(x,14,w-14)}" y="${T0-6}" text-anchor="middle" class="t-strong">${t('now')}</text>`}
+  return s+'</svg>';
+}
+function chDial(v,{max=300,w=200,h=118}={}){
+  const bands=[[0,50,'leaf',1],[50,100,'leaf',.5],[100,150,'sun',1],[150,200,'bad',.55],[200,300,'bad',1]],cx=100,cy=100,r=76;
+  let s=`<svg class="chart" viewBox="0 0 ${w} ${h}" role="img">`;
+  bands.forEach(([a,b,c,o])=>s+=`<path d="${arcPath(cx,cy,r,a+.8,b-.8,max)}" fill="none" class="s-${c}" stroke-opacity="${o}" stroke-width="13" stroke-linecap="butt"/>`);
+  const p=arcPt(cx,cy,r-18,v,max);
+  s+=`<line x1="${cx}" y1="${cy}" x2="${p[0].toFixed(1)}" y2="${p[1].toFixed(1)}" class="s-ink" stroke-width="3.5" stroke-linecap="round" style="transition:all .8s"/><circle cx="${cx}" cy="${cy}" r="6" class="f-ink"/>`;
+  s+=`<text x="${cx-r-6}" y="${cy+16}">0 ${S.lang==='hi'?'साफ़':'clean'}</text><text x="${cx+r+6}" y="${cy+16}" text-anchor="end">300 ${S.lang==='hi'?'ख़राब':'bad'}</text>`;
+  
+  return s+'</svg>';
+}
+function chBars7(days,{w=220,h=96}={}){
+  const mx=45,bw=20,gap=(w-14-7*bw)/6;let s=`<svg class="chart" viewBox="0 0 ${w} ${h}" role="img"><line class="grid" x1="4" x2="${w-4}" y1="${h-18}" y2="${h-18}"/>`;
+  days.forEach((d,i)=>{const x=7+i*(bw+gap),bh=14+d.m/mx*(h-60),y=h-18-bh;
+    s+=`<rect class="grow-y ${d.late?'f-bad':'f-leaf'}" style="animation-delay:${i*70}ms" x="${x}" y="${y}" width="${bw}" height="${bh}" rx="5"/><text x="${x+bw/2}" y="${h-5}" text-anchor="middle">${d.l}</text>`;
+    if(d.late)s+=`<text x="${x+bw/2}" y="${y-5}" text-anchor="middle" class="t-strong" style="fill:var(--bad)">${S.lang==='hi'?'देर '+d.m+' मि.':'Late '+d.m+'m'}</text>`});
+  return s+'</svg>';
+}
+function chRing(pct,{size=96,label='',sub=''}={}){
+  const r=38,C=2*Math.PI*r;
+  return`<svg class="chart" viewBox="0 0 100 100" width="${size}" height="${size}" role="img"><circle cx="50" cy="50" r="${r}" fill="none" class="s-line" stroke-width="11"/><circle cx="50" cy="50" r="${r}" fill="none" class="s-sun" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(C*pct/100).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 50 50)" style="animation:ringIn 1.2s var(--ease) both"/><text x="50" y="52" text-anchor="middle" class="t-strong" style="font-size:19px;font-family:var(--f-display);font-weight:800">${pct}%</text><text x="50" y="65" text-anchor="middle" style="font-size:8px">${esc(sub)}</text></svg>`;
+}
+function chStack(parts,{onBrand=false}={}){
+  const cols=['leaf','info','sun','bad'],tot=parts.reduce((a,p)=>a+p.v,0);let x=0,s='<div style="display:flex;height:34px;border-radius:12px;overflow:hidden;gap:2px">';
+  parts.forEach((p,i)=>{s+=`<div style="width:${p.v/tot*100}%;background:var(--${cols[i]});display:grid;place-items:center;font-weight:800;font-size:.8rem;color:${i===2?'#2A1D00':'#fff'};animation:growX .9s var(--ease) both">${p.v}%</div>`});
+  s+='</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px 12px;margin-top:10px;font-size:.82rem">';
+  parts.forEach((p,i)=>s+=`<div><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--${cols[i]});margin-right:6px"></i>${esc(p.l||p.k)}</div>`);
+  return s+'</div>';
+}
+function chHours(vals,{nowI=-1,from=6,to=22,w=300,h=120,cls='leaf',badAbove=null,unit=''}={}){
+  const n=to-from+1,bw=(w-16)/n-3,mx=Math.max(...vals.slice(from,to+1),1);let s=`<svg class="chart" viewBox="0 0 ${w} ${h}" role="img"><line class="grid" x1="4" x2="${w-4}" y1="${h-20}" y2="${h-20}"/>`;
+  for(let i=from;i<=to;i++){const x=8+(i-from)*(bw+3),bh=Math.max(2,vals[i]/mx*(h-46)),y=h-20-bh,isNow=i===nowI;
+    const c=badAbove!=null?(vals[i]>badAbove?'bad':vals[i]>badAbove*.7?'sun':'leaf'):cls;
+    s+=`<rect class="grow-y f-${c}" style="animation-delay:${(i-from)*30}ms${isNow?'':';opacity:.78'}" x="${x}" y="${y}" width="${bw}" height="${bh}" rx="3"/>`;
+    if(isNow)s+=`<text x="${x+bw/2}" y="${y-5}" text-anchor="middle" class="t-strong">${t('now')}</text>`;
+    if((i-from)%4===0||i===to)s+=`<text x="${x+bw/2}" y="${h-6}" text-anchor="middle">${i===12?'12p':(i%12||12)+(i<12?'a':'p')}</text>`}
+  return s+'</svg>';
+}
+function chCompare(you,nb,{w=300,h=130}={}){
+  const mx=Math.max(...you,...nb)*1.15,L0=10,R0=62,T0=14,B0=20,X=i=>L0+i/6*(w-L0-R0),Y=v=>T0+(1-v/mx)*(h-T0-B0);
+  const pth=a=>a.map((v,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)).join('');
+  const days=[...Array(7)].map((_,i)=>['S','M','T','W','T','F','S'][(new Date().getDay()-6+i+7)%7]);
+  let s=`<svg class="chart" viewBox="0 0 ${w} ${h}" role="img"><line class="grid" x1="${L0}" x2="${w-R0}" y1="${h-B0}" y2="${h-B0}"/>`;
+  s+=`<path d="${pth(nb)}" fill="none" class="s-sun" stroke-width="2.4" stroke-dasharray="2 6" stroke-linecap="round"/><path class="draw s-leaf" style="--len:${w*2}" d="${pth(you)}" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+  days.forEach((d,i)=>s+=`<text x="${X(i)}" y="${h-6}" text-anchor="middle">${d}</text>`);
+  s+=`<text x="${w-R0+8}" y="${Y(you[6])+3}" class="t-strong" style="fill:var(--leaf)">${S.lang==='hi'?'आप':'You'} ${you[6]}</text><text x="${w-R0+8}" y="${Y(nb[6])+3}" class="t-strong" style="fill:var(--sun)">${S.lang==='hi'?'पड़ोसी':'Neighbours'} ${nb[6]}</text>`;
+  return s+'</svg>';
+}
+function chHBars(rows){ // rows: {l,v,max,cls,txt}
+  const mx=Math.max(...rows.map(r=>r.v));
+  return'<div style="display:flex;flex-direction:column;gap:9px">'+rows.map(r=>`<div style="display:grid;grid-template-columns:minmax(80px,1.1fr) 3fr auto;gap:10px;align-items:center;font-size:.85rem"><span>${esc(r.l)}</span><div class="bar ${r.cls||''}"><i style="width:${r.v/mx*100}%"></i></div><b class="num">${esc(r.txt)}</b></div>`).join('')+'</div>';
+}
+function chSpark(vals,{w=120,h=36,col='var(--sun)'}={}){
+  const mn=Math.min(...vals)-2,mx=Math.max(...vals)+2,X=i=>4+i/(vals.length-1)*(w-8),Y=v=>h-4-(v-mn)/(mx-mn)*(h-8);
+  return`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><path d="${vals.map((v,i)=>(i?'L':'M')+X(i)+' '+Y(v)).join('')}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${X(vals.length-1)}" cy="${Y(vals[vals.length-1])}" r="3.5" fill="${col}"/></svg>`;
+}
+
+/* ---------- stylised map: same renderer for every city ---------- */
+function cityMap({pins=[],layer='none',you=true,w=400,h=260,hot=-1,id=S.city,small=false}={}){
+  const r=rngOf('map'+id),c=CITIES.find(x=>x.id===id)||city();
+  let s=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Map"><rect width="${w}" height="${h}" class="f-surface2"/>`;
+  const lx=60+r()*80,ly=70+r()*120;
+  s+=`<ellipse cx="${lx}" cy="${ly}" rx="${48+r()*26}" ry="${24+r()*18}" fill="var(--info)" opacity=".28" transform="rotate(${Math.round(r()*40-20)} ${lx} ${ly})"/>`;
+  s+=`<rect x="${230+r()*80}" y="${20+r()*20}" width="70" height="46" rx="14" fill="var(--leaf)" opacity=".22"/><rect x="${200+r()*60}" y="${170+r()*30}" width="84" height="52" rx="16" fill="var(--leaf)" opacity=".2"/>`;
+  for(let i=1;i<9;i++){const y=i*h/9+(r()-.5)*10;s+=`<path d="M0 ${y}Q${w/2} ${y+(r()-.5)*24} ${w} ${y+(r()-.5)*14}" stroke="var(--surface)" stroke-width="3" fill="none"/>`}
+  for(let i=1;i<12;i++){const x=i*w/12+(r()-.5)*10;s+=`<path d="M${x} 0Q${x+(r()-.5)*20} ${h/2} ${x+(r()-.5)*12} ${h}" stroke="var(--surface)" stroke-width="3" fill="none"/>`}
+  const roads=[[[0,150+r()*20],[130,120+r()*30],[260,140+r()*20],[w,100+r()*30]],[[90+r()*40,0],[150+r()*30,90],[210+r()*30,170],[230+r()*40,h]],[[0,40+r()*30],[120,70],[250,50+r()*20],[w,70+r()*20]]];
+  const pl=a=>a.map((p,i)=>(i?'L':'M')+p[0].toFixed(0)+' '+p[1].toFixed(0)).join('');
+  roads.forEach(a=>s+=`<path d="${pl(a)}" stroke="var(--surface)" stroke-width="9" fill="none" stroke-linejoin="round" stroke-linecap="round"/>`);
+  if(layer==='traffic')roads.forEach((a,i)=>{const lv=[['bad','sun'],['sun','leaf'],['leaf','leaf']][i];s+=`<path d="${pl(a.slice(0,2))}" class="s-${lv[0]}" stroke-width="5" fill="none" stroke-linecap="round"/><path d="${pl(a.slice(1))}" class="s-${lv[1]}" stroke-width="5" fill="none" stroke-linecap="round"/>`});
+  if(layer==='bus'){[roads[0],roads[1]].forEach(a=>{s+=`<path d="${pl(a)}" class="s-info" stroke-width="3.5" fill="none" stroke-dasharray="7 5" stroke-linecap="round"/>`;a.forEach(p=>s+=`<circle cx="${p[0]}" cy="${p[1]}" r="6" class="f-info"/><circle cx="${p[0]}" cy="${p[1]}" r="2.4" fill="#fff"/>`)})}
+  if(layer==='park'){[[120,115],[255,138],[190,60],[300,190]].forEach(p=>s+=`<rect x="${p[0]-11}" y="${p[1]-11}" width="22" height="22" rx="6" class="f-info"/><text x="${p[0]}" y="${p[1]+5}" text-anchor="middle" style="fill:#fff;font-weight:800;font-size:13px">P</text>`)}
+  if(layer==='ev'){[[150,100],[240,150],[320,80]].forEach(p=>s+=`<circle cx="${p[0]}" cy="${p[1]}" r="12" class="f-sun"/><path d="M${p[0]+2} ${p[1]-7}l-6 8h5l-2 6 6-8h-5z" fill="#2A1D00"/>`)}
+  if(you){const yx=w*.46,yy=h*.5;s+=`<circle cx="${yx}" cy="${yy}" r="9" class="f-leaf pulse-ring"/><circle cx="${yx}" cy="${yy}" r="7" class="f-leaf" stroke="#fff" stroke-width="2.5"/>`;if(!small)s+=`<text x="${yx}" y="${yy+22}" text-anchor="middle" class="t-strong" style="font-size:11px">${S.lang==='hi'?'आप':'You'}</text>`}
+  pins.forEach((p,i)=>{const col=p.ev?'info':['bad','bad','sun','leaf'][p.st??0],tc=col==='sun'?'#2A1D00':'#fff';
+    s+=`<g class="pin${i===hot?' hot':''}" data-act="pin" data-i="${i}" tabindex="0" role="button" aria-label="${esc(p.label||'Pin '+(i+1))}">${p.st===0?`<circle cx="${p.x}" cy="${p.y}" r="12" class="f-bad pulse-ring" opacity=".5"/>`:''}<circle cx="${p.x}" cy="${p.y}" r="12" class="f-${col}" stroke="#fff" stroke-width="2.5"/><text x="${p.x}" y="${p.y+4}" text-anchor="middle" style="fill:${tc};font-weight:800;font-size:12px">${p.n??i+1}</text></g>`});
+  return s+'</svg>';
+}
+/* ====== Shell: router, chrome, sheets, toasts ====== */
+const ACT={},PAGES={},AFTER={};
+let TM=[];
+const every=(fn,ms)=>{const id=setInterval(fn,ms);TM.push(id);return id};
+const clearTimers=()=>{TM.forEach(clearInterval);TM=[]};
+addI({en:{wasteS:'Utilities',greetSub:'Here is your day in {area}.',lang2:'हिं',ariaLang:'Switch language',ariaTheme:'Switch light or dark',ariaBell:'Notifications',ariaSet:'Settings',askShort:'Ask'},
+      hi:{wasteS:'कचरा/बिजली',greetSub:'{area} में आपका दिन।',lang2:'EN',ariaLang:'भाषा बदलें',ariaTheme:'हल्का या गहरा बदलें',ariaBell:'सूचनाएँ',ariaSet:'सेटिंग',askShort:'पूछें'}});
+
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const f=ACT[el.dataset.act];if(f)f(el,e)});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){if($('#layer .sheet'))closeSheet()}
+  if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('g[data-act]')){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}))}
+});
+
+function toast(msg,label,fn){
+  $$('.toast').forEach(x=>x.remove());const d=document.createElement('div');d.className='toast';d.setAttribute('role','status');
+  const s=document.createElement('span');s.textContent=msg;d.append(s);
+  if(label){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=()=>{fn&&fn();d.remove()};d.append(b)}
+  $('#layer').append(d);clearTimeout(toast.t);toast.t=setTimeout(()=>d.remove(),label?7000:3400);
+}
+let SHT=null;
+function openSheet(html,after){
+  closeSheet();const l=$('#layer'),sc=document.createElement('div');sc.className='scrim';sc.dataset.act='sheet-close';
+  const sh=document.createElement('div');sh.className='sheet';sh.setAttribute('role','dialog');sh.setAttribute('aria-modal','true');sh.innerHTML=`<div class="grab"></div>${html}`;
+  l.append(sc,sh);document.body.style.overflow='hidden';after&&after(sh);
+  const f=sh.querySelector('input,textarea,button');f&&f.focus({preventScroll:true});return sh;
+}
+function closeSheet(){$$('#layer .scrim,#layer .sheet').forEach(x=>x.remove());clearInterval(SHT);SHT=null;if($('#welcome').hidden)document.body.style.overflow=''}
+ACT['sheet-close']=closeSheet;
+
+function applyPrefs(){
+  const r=document.documentElement;if(S.theme==='system')r.removeAttribute('data-theme');else r.setAttribute('data-theme',S.theme);
+  r.style.setProperty('--fs',S.textSize);r.lang=S.lang;save();
+}
+function applyLang(){applyPrefs();renderChrome();if($('#welcome').hidden)render(true)}
+const isDark=()=>S.theme==='dark'||(S.theme==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);
+
+const navItems=()=>S.role==='manager'
+ ?[{id:'queue',ic:'report',l:t('queue')},{id:'mapv',ic:'pin',l:t('mapv')},{id:'insights',ic:'pulse',l:t('insights')},{id:'exit',ic:'home',l:t('citizenView')}]
+ :[{id:'home',ic:'home',l:t('home')},{id:'travel',ic:'travel',l:t('travel')},{id:'waste',ic:'waste',l:t('waste'),s:t('wasteS')},{id:'report',ic:'report',l:t('report')},{id:'future',ic:'future',l:t('future')}];
+const navCur=id=>S.role==='manager'?(S.tab.mgr||'queue')===id:S.page===id;
+function renderChrome(){
+  const mgr=S.role==='manager',items=navItems();
+  $('#side').innerHTML=`<div class="logo">${ico('pulse').replace('<svg','<svg width="30" height="30" style="color:var(--leaf)"')}Spandan</div>`+items.map(n=>`<button class="navbtn" data-act="nav" data-p="${n.id}" ${navCur(n.id)?'aria-current="page"':''} type="button">${ico(n.ic)}<span>${esc(n.l)}</span></button>`).join('')
+   +`<div class="cityfoot"><div class="eyebrow">${t('city')}</div><b>${esc(cname())}</b><div class="muted">${esc(areaName(curArea()))}</div><button class="btn sm ghost" style="margin-top:10px" data-act="settings" type="button">${t('changeCity')}</button></div>`;
+  $('#tabbar').innerHTML=items.map(n=>`<button class="navbtn" data-act="nav" data-p="${n.id}" ${navCur(n.id)?'aria-current="page"':''} type="button">${ico(n.ic)}<span>${esc(n.s||n.l)}</span></button>`).join('');
+  const dot=S.role==='citizen'&&!S.bellSeen?'<span class="dot"></span>':'';
+  $('#top').innerHTML=`<div class="brandmark mob">${ico('pulse').replace('<svg','<svg width="26" height="26" style="color:var(--leaf)"')}Spandan</div>
+   <button class="chip" data-act="settings" type="button" style="margin-left:4px">${ico('pin').replace('<svg','<svg width="15" height="15"')}${esc(cname())}${mgr?'':' · '+esc(areaName(curArea()))}</button>${mgr?`<span class="mgr-badge">${S.lang==='hi'?'नगर निगम':'NAGAR NIGAM'}</span>`:''}
+   <span class="spacer"></span>
+   <button class="icobtn" data-act="lang" type="button" aria-label="${esc(t('ariaLang'))}" style="font-weight:800;font-size:.85rem;font-family:var(--f-display)">${t('lang2')}</button>
+   <button class="icobtn themebtn" data-act="theme" type="button" aria-label="${esc(t('ariaTheme'))}">${ico(isDark()?'sun':'moon')}</button>
+   ${mgr?'':`<button class="icobtn" data-act="bell" type="button" aria-label="${esc(t('ariaBell'))}">${ico('bell')}${dot}</button>`}
+   <button class="icobtn" data-act="settings" type="button" aria-label="${esc(t('ariaSet'))}">${ico('sliders')}</button>`;
+  const fab=$('#fab');fab.hidden=mgr||!S.onboarded;fab.dataset.act='ask';fab.innerHTML=`${ico('spark')}<span>${t('ask')}</span>`;
+}
+function render(keep){
+  clearTimers();const y=window.scrollY,v=$('#view'),pg=S.role==='manager'?'manager':S.page;
+  v.innerHTML=`<div class="page" data-page="${pg}" ${keep?'style="animation:none"':''}>${(PAGES[pg]||PAGES.home)()}</div>`;
+  renderChrome();AFTER[pg]&&AFTER[pg]();if(keep)window.scrollTo(0,y);
+}
+function go(p){
+  if(p==='exit'){S.role='citizen';S.page='home'}
+  else if(S.role==='manager'){S.tab.mgr=p}
+  else S.page=p;
+  render();window.scrollTo({top:0});
+}
+ACT.nav=el=>go(el.dataset.p);
+ACT.lang=()=>{S.lang=S.lang==='en'?'hi':'en';applyLang();toast(S.lang==='hi'?'अब ऐप हिंदी में है':'App is now in English')};
+ACT.theme=()=>{S.theme=isDark()?'light':'dark';applyPrefs();renderChrome()};
+
+/* live countdowns: any element with data-until="<epoch ms>" */
+setInterval(()=>{const n=Date.now();$$('[data-until]').forEach(e=>{const l=+e.dataset.until-n;e.textContent=l>0?fmtLeft(l):(S.lang==='hi'?'बंद':'closed')})},1000);
+/* ====== Welcome: 6 steps, pulse line is the progress bar ====== */
+addI({en:{
+ wHello:'Tap hello in your language',wFind:'Find your city',wSearch:'Search any city',wLoc:'Use my location',wConn:'{city} · {feeds} connected',wNoCity:"We don't have “{q}” yet.",wAsk:'Ask for {q}',
+ wAsked:'Thanks. {q} is on the request list. You are number {n}.',wPlug:'How a city plugs in',wPlugTxt:'Any city shares its data once, in this simple shape. Spandan does the rest.',
+ wArea:'Your neighbourhood',wAreaHint:'Tap the map to drop a pin, or type your area. Van and water timings will be for your street.',wAreaPh:'Type your area',wPinned:'Pinned near',
+ wMatter:'What matters to you?',wMatterHint:'Pick any. These show first on Home.',wReach:'How should we reach you?',
+ mOnly:'Morning summary only',mOnlyD:'One short note at 7 AM',impOnly:'Important alerts only',impOnlyD:'Water cuts, power cuts, bad air',everything:'Everything',everythingD:'Also van timings, events and report updates',
+ quiet:'Quiet hours 10 PM to 6 AM',wReady:'Your {city} is ready',wOpen:'Open Spandan',wLocFail:'Location is blocked in this preview, so we picked {city}. You can change it.',wLocOk:'Found you near {city}.',
+ suggestLang:'Show the app in {l}',
+},hi:{
+ wHello:'अपनी भाषा में नमस्ते चुनें',wFind:'अपना शहर चुनें',wSearch:'कोई भी शहर खोजें',wLoc:'मेरी लोकेशन इस्तेमाल करें',wConn:'{city} · {feeds} जुड़े हैं',wNoCity:'“{q}” अभी हमारे पास नहीं है।',wAsk:'{q} जोड़ने को कहें',
+ wAsked:'धन्यवाद। {q} माँग-सूची में है। आप {n} नंबर पर हैं।',wPlug:'शहर कैसे जुड़ता है',wPlugTxt:'कोई भी शहर अपना डेटा एक बार इसी सरल रूप में देता है। बाकी काम स्पंदन करता है।',
+ wArea:'आपका इलाका',wAreaHint:'नक्शे पर पिन लगाएँ या अपना इलाका लिखें। कचरा गाड़ी और पानी का समय आपकी गली का होगा।',wAreaPh:'अपना इलाका लिखें',wPinned:'पिन के पास',
+ wMatter:'आपके लिए क्या ज़रूरी है?',wMatterHint:'जितने चाहें चुनें। ये होम पर पहले दिखेंगे।',wReach:'आपसे कैसे बात करें?',
+ mOnly:'सिर्फ़ सुबह का सारांश',mOnlyD:'सुबह 7 बजे एक छोटा संदेश',impOnly:'सिर्फ़ ज़रूरी अलर्ट',impOnlyD:'पानी-बिजली कटौती, ख़राब हवा',everything:'सब कुछ',everythingD:'कचरा गाड़ी, कार्यक्रम और शिकायत की ख़बर भी',
+ quiet:'शांत समय: रात 10 से सुबह 6',wReady:'आपका {city} तैयार है',wOpen:'स्पंदन खोलें',wLocFail:'इस प्रीव्यू में लोकेशन बंद है, इसलिए हमने {city} चुना। आप बदल सकते हैं।',wLocOk:'आप {city} के पास मिले।',
+ suggestLang:'ऐप {l} में दिखाएँ',
+}});
+const FEEDL={move:{en:'traffic',hi:'ट्रैफिक'},garbage:{en:'garbage',hi:'कचरा'},water:{en:'water',hi:'पानी'},power:{en:'power',hi:'बिजली'},air:{en:'air',hi:'हवा'},events:{en:'events',hi:'कार्यक्रम'},safety:{en:'safety',hi:'सुरक्षा'}};
+const LATLNG={bhopal:[23.26,77.41],indore:[22.72,75.86],delhi:[28.61,77.21],mumbai:[19.08,72.88],bengaluru:[12.97,77.59],chennai:[13.08,80.27],kolkata:[22.57,88.36],hyderabad:[17.39,78.49]};
+const W={i:0,q:'',timer:null,pin:null,asked:null};
+const PREFS=['move','garbage','water','air','power','events','safety'];
+const PREFN={move:{en:'Getting around',hi:'आना-जाना'},garbage:{en:'Garbage pickup',hi:'कचरा उठान'},water:{en:'Water supply',hi:'पानी की सप्लाई'},air:{en:'Air quality',hi:'हवा की सेहत'},power:{en:'Power cuts',hi:'बिजली कटौती'},events:{en:'Events',hi:'कार्यक्रम'},safety:{en:'Safety',hi:'सुरक्षा'}};
+const feedList=c=>c.feeds.map(f=>L(FEEDL[f])).join(', ');
+
+function pulsePath(w,h=36){let x=0,d=`M0 ${h/2}`;const m=h/2;while(x<w){d+=`L${x+26} ${m}L${x+32} ${m-8}L${x+38} ${m+11}L${x+44} ${m-15}L${x+50} ${m+6}L${x+56} ${m}L${x+72} ${m}`;x+=72}return d}
+function setPulse(frac){const sv=$('#wp-svg');if(!sv)return;const w=Math.max(120,sv.clientWidth||300),d=pulsePath(w);$('#wp-track').setAttribute('d',d);const g=$('#wp-go');g.setAttribute('d',d);const len=g.getTotalLength();g.style.strokeDasharray=len;g.style.strokeDashoffset=len*(1-frac)}
+
+function wShow(i){
+  W.i=i;clearInterval(W.timer);const b=$('#wbody');b.innerHTML=`<div class="wstep on" id="ws${i}">${wStep(i)}</div>`;
+  setPulse(i===0?0.04:(i+1)/6);$('#wskip').textContent=t('skip');$('#wskip').hidden=i>=5;
+  if(i===0){const sp=$$('.hello span');let k=0;sp[0].classList.add('on');W.timer=setInterval(()=>{sp[k].classList.remove('on');k=(k+1)%sp.length;sp[k].classList.add('on')},1700)}
+  if(i===5)readyShow();
+  const f=b.querySelector('input,button');if(f&&i>0&&i!==5&&i!==3&&i!==4)f.focus({preventScroll:true});
+}
+const wNav=(back,next,nextOk=true,nextLbl)=>`<div class="row" style="margin-top:6px">${back?`<button class="wbtn ghost" data-act="w-back" type="button">${t('back')}</button>`:''}<button class="wbtn grow" data-act="${next}" type="button" ${nextOk?'':'disabled'}>${nextLbl||t('next')} ${ico('arrow','')}</button></div>`.replace(/<svg/g,'<svg width="20" height="20"');
+function wStep(i){
+  if(i===0)return`<div class="hello" aria-hidden="true"><span>Hello</span><span>नमस्ते</span><span>வணக்கம்</span><span>নমস্কার</span></div><h1 class="wh" style="font-size:clamp(1.3rem,4.5vw,1.8rem)">${t('wHello')}</h1>
+  <div class="langgrid">${Object.keys(LANGS).map(k=>`<button class="lang" data-act="w-lang" data-l="${k}" type="button" lang="${k}"><b>${LANGS[k].hello}</b><small>${LANGS[k].name}</small></button>`).join('')}</div><p class="wp" style="font-size:.9rem">English · हिन्दी · தமிழ் · বাংলা<br>${S.lang==='hi'?'और क्षेत्रीय भाषाएँ जल्द आ रही हैं।':'More regional languages are coming.'}</p>`;
+  if(i===1)return`<h1 class="wh">${t('wFind')}</h1><button class="wbtn sun" data-act="w-geo" type="button">${ico('pin').replace('<svg','<svg width="22" height="22"')}${t('wLoc')}</button>
+  <input class="wfield" id="wq" type="search" placeholder="${esc(t('wSearch'))}" value="${esc(W.q)}" autocomplete="off" aria-label="${esc(t('wSearch'))}"><div id="wcities">${cityListHTML()}</div>${wNav(true,'w-next',true)}`;
+  if(i===2)return`<h1 class="wh">${t('wArea')}</h1><p class="wp">${t('wAreaHint')}</p><div class="wmap" id="wmap" data-act="w-pin">${areaMapSVG()}</div>
+  <input class="wfield" id="warea" list="areas" placeholder="${esc(t('wAreaPh'))}" value="${esc(S.area)}" autocomplete="off"><datalist id="areas">${city().areas.map(a=>`<option value="${esc(a)}">`).join('')}</datalist>
+  <div class="provides">${city().areas.map(a=>`<button class="wbtn ghost" style="min-height:40px;padding:6px 16px;font-size:.9rem" data-act="w-area" data-a="${esc(a)}" type="button">${esc(areaName(a))}</button>`).join('')}</div>${wNav(true,'w-next',true)}`;
+  if(i===3)return`<h1 class="wh">${t('wMatter')}</h1><p class="wp">${t('wMatterHint')}</p><div class="wtiles">${PREFS.map(k=>`<button class="wtile" data-act="w-pref" data-k="${k}" aria-pressed="${S.prefs.includes(k)}" type="button">${ico(FEEDICON[k])}<span>${L(PREFN[k])}</span></button>`).join('')}</div>${wNav(true,'w-next',true)}`;
+  if(i===4){const o=(k,a,b)=>`<button class="wopt" data-act="w-notif" data-k="${k}" aria-pressed="${S.notif===k}" type="button"><span class="rad"></span><span><b>${t(a)}</b><small>${t(b)}</small></span></button>`;
+    return`<h1 class="wh">${t('wReach')}</h1><div class="stack" style="gap:10px">${o('morning','mOnly','mOnlyD')}${o('important','impOnly','impOnlyD')}${o('all','everything','everythingD')}
+    <button class="wopt" data-act="w-quiet" aria-pressed="${S.quiet}" type="button"><span class="rad"></span><span><b>${t('quiet')}</b></span></button></div>${wNav(true,'w-next',true)}`}
+  return`<h1 class="wh">${t('wReady',{city:cname()})}</h1><div class="wready" id="wready"><svg class="bigpulse" id="bigp" viewBox="0 0 600 80" preserveAspectRatio="none"><path id="bigpp" d=""/></svg></div>
+  <div class="comfort"><b style="font-size:.9rem">${t('settings')}</b><span class="row" style="gap:6px">${[.9,1,1.2].map(z=>`<button data-act="w-size" data-z="${z}" aria-pressed="${S.textSize===z}" type="button" style="font-size:${.85*z+.1}rem" aria-label="${t('textSize')}">A</button>`).join('')}</span><span class="row" style="gap:6px">${['light','dark','system'].map(m=>`<button data-act="w-theme" data-m="${m}" aria-pressed="${S.theme===m}" type="button">${t(m==='system'?'auto':m)}</button>`).join('')}</span></div>
+  <button class="wbtn sun" data-act="w-finish" type="button" id="wfin" style="opacity:0;pointer-events:none">${t('wOpen')} ${ico('arrow').replace('<svg','<svg width="22" height="22"')}</button>`;
+}
+function cityListHTML(){
+  const q=W.q.trim().toLowerCase(),list=CITIES.filter(c=>!q||c.n.en.toLowerCase().includes(q)||(c.n.hi||'').includes(q)||c.st.toLowerCase().includes(q));
+  const cur=city();let h='';
+  if(!list.length){const n=store.get('requests',{})[q]||0;
+    h=`<div class="readycard" style="margin-top:6px"><b>${t('wNoCity',{q:esc(W.q.trim())})}</b>${W.asked===q?`<p class="wp">${t('wAsked',{q:esc(W.q.trim()),n:W.n})}</p>`:`<button class="wbtn sun" data-act="w-req" type="button">${t('wAsk',{q:esc(W.q.trim())})}</button>`}
+    <details><summary class="wp" style="cursor:pointer;margin-top:8px">${t('wPlug')}</summary><p class="wp" style="margin:8px 0">${t('wPlugTxt')}</p><pre style="margin:0;font-size:.75rem;overflow:auto;padding:12px;border-radius:12px;background:rgba(0,0,0,.28);color:#CFEFDC">{
+  "city": "${esc(W.q.trim())}",
+  "areas": ["Ward 1", "Ward 2"],
+  "feeds": {
+    "traffic": "https://…/traffic.json",
+    "garbage": "https://…/vans.json",
+    "water":   "https://…/supply.json"
+  }
+}</pre></details></div>`}
+  else h=`<div class="citylist">${list.map(c=>`<button class="cityrow ${c.id===cur.id?'on':''}" data-act="w-city" data-id="${c.id}" type="button">${ico('pin').replace('<svg','<svg width="22" height="22"')}<span class="grow"><b>${L(c.n)}</b><br><small>${esc(c.st)}</small></span>${c.id===cur.id?ico('check').replace('<svg','<svg width="22" height="22"'):''}</button>`).join('')}</div>`;
+  if(list.length)h+=`<div style="margin-top:12px"><p class="wp" style="margin-bottom:8px"><b style="color:var(--w-ink)">${t('wConn',{city:cname(),feeds:feedList(cur)})}</b></p><div class="provides">${ALLFEEDS.map(f=>`<span class="${cur.feeds.includes(f)?'':'no'}">${L(FEEDL[f])}</span>`).join('')}</div>${cur.lang!==S.lang?`<button class="wbtn ghost" style="margin-top:12px;min-height:44px" data-act="w-lang2" data-l="${cur.lang}" type="button">${t('suggestLang',{l:LANGS[cur.lang].name})}</button>`:''}</div>`;
+  return h;
+}
+function areaMapSVG(){
+  const svg=cityMap({you:false,pins:[]}),p=W.pin||{x:200,y:130};
+  return svg.replace('</svg>',`<g><circle cx="${p.x}" cy="${p.y}" r="16" class="f-leaf pulse-ring"/><path d="M${p.x} ${p.y+2}c-9-10-12-14-12-20a12 12 0 0 1 24 0c0 6-3 10-12 20z" transform="translate(0 -2)" class="f-sun" stroke="#fff" stroke-width="2"/><circle cx="${p.x}" cy="${p.y-20}" r="4.5" fill="#2A1D00"/></g></svg>`);
+}
+function nearestArea(x,y){const c=city(),r=rngOf('anc'+c.id);let best=c.areas[0],bd=1e9;c.areas.forEach(a=>{const ax=50+r()*300,ay=40+r()*180,d=(ax-x)**2+(ay-y)**2;if(d<bd){bd=d;best=a}});return best}
+function readyShow(){
+  const bp=$('#bigpp'),rd=$('#wready');if(!bp)return;bp.setAttribute('d','M0 40L120 40L150 12L180 66L215 4L250 52L275 40L600 40');
+  const len=bp.getTotalLength();bp.style.strokeDasharray=len;bp.style.strokeDashoffset=len;bp.getBoundingClientRect();bp.style.transition='stroke-dashoffset 1.3s cubic-bezier(.2,.8,.2,1)';bp.style.strokeDashoffset=0;
+  setTimeout(()=>{rd.innerHTML=`<div class="readycard"><div class="eyebrow" style="color:var(--w-ink2)">${t('yourDay')} · ${esc(areaName(curArea()))}</div>${dayItems().slice(0,4).map(dayRow).join('')}</div>`;const f=$('#wfin');if(f){f.style.transition='opacity .6s';f.style.opacity=1;f.style.pointerEvents='auto'}},1250);
+}
+function welcomeOpen(){$('#welcome').hidden=false;document.body.style.overflow='hidden';wShow(0)}
+function welcomeClose(){clearInterval(W.timer);$('#welcome').hidden=true;document.body.style.overflow='';S.onboarded=true;if(!S.area)S.area=city().areas[0];save();applyPrefs();go('home')}
+function useLocation(){
+  const ok=id=>{S.city=id;W.q='';const c=city();S.area='';toast(t('wLocOk',{city:cname()}));$('#wcities').innerHTML=cityListHTML();$('#wq').value=''},
+   fail=()=>{S.city=city().id;toast(t('wLocFail',{city:cname()}));$('#wcities').innerHTML=cityListHTML()};
+  if(!navigator.geolocation)return fail();
+  let done=false;const to=setTimeout(()=>{if(!done){done=true;fail()}},3500);
+  try{navigator.geolocation.getCurrentPosition(p=>{if(done)return;done=true;clearTimeout(to);let best=CITIES[0].id,bd=1e9;for(const k in LATLNG){const d=(LATLNG[k][0]-p.coords.latitude)**2+(LATLNG[k][1]-p.coords.longitude)**2;if(d<bd){bd=d;best=k}}ok(best)},()=>{if(!done){done=true;clearTimeout(to);fail()}},{timeout:3000})}catch(e){if(!done){done=true;clearTimeout(to);fail()}}
+}
+Object.assign(ACT,{
+ 'w-lang':el=>{S.lang=el.dataset.l;applyLang();wShow(1)},
+ 'w-lang2':el=>{S.lang=el.dataset.l;applyLang();wShow(1)},
+ 'w-next':()=>wShow(Math.min(5,W.i+1)),'w-back':()=>wShow(Math.max(0,W.i-1)),
+ 'w-geo':()=>useLocation(),
+ 'w-city':el=>{S.city=el.dataset.id;S.area='';W.pin=null;$('#wcities').innerHTML=cityListHTML()},
+ 'w-req':()=>{const q=W.q.trim().toLowerCase(),r=store.get('requests',{});r[q]=(r[q]||40+hash(q)%60)+1;store.set('requests',r);W.asked=q;W.n=r[q];$('#wcities').innerHTML=cityListHTML()},
+ 'w-pin':(el,ev)=>{const sv=el.querySelector('svg'),b=sv.getBoundingClientRect();const x=(ev.clientX-b.left)/b.width*400,y=(ev.clientY-b.top)/b.height*260;W.pin={x:Math.round(x),y:Math.round(y)};S.area=nearestArea(x,y);el.innerHTML=areaMapSVG();$('#warea').value=S.area},
+ 'w-area':el=>{S.area=el.dataset.a;const i=city().areas.indexOf(S.area),r=rngOf('anc'+S.city);const pts=city().areas.map(()=>[50+r()*300,40+r()*180]);W.pin={x:Math.round(pts[i][0]),y:Math.round(pts[i][1])};$('#wmap').innerHTML=areaMapSVG();$('#warea').value=S.area},
+ 'w-pref':el=>{const k=el.dataset.k,i=S.prefs.indexOf(k);if(i>=0){if(S.prefs.length>1)S.prefs.splice(i,1)}else S.prefs.push(k);el.setAttribute('aria-pressed',S.prefs.includes(k))},
+ 'w-notif':el=>{S.notif=el.dataset.k;$$('[data-act="w-notif"]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===S.notif))},
+ 'w-quiet':el=>{S.quiet=!S.quiet;el.setAttribute('aria-pressed',S.quiet)},
+ 'w-size':el=>{S.textSize=+el.dataset.z;applyPrefs();$$('[data-act="w-size"]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.z===S.textSize))},
+ 'w-theme':el=>{S.theme=el.dataset.m;applyPrefs();$$('[data-act="w-theme"]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===S.theme))},
+ 'w-finish':()=>welcomeClose(),
+});
+document.addEventListener('input',e=>{
+  if(e.target.id==='wq'){W.q=e.target.value;W.asked=null;$('#wcities').innerHTML=cityListHTML()}
+  if(e.target.id==='warea'){const v=e.target.value.trim();const m=city().areas.find(a=>a.toLowerCase()===v.toLowerCase());S.area=m||v;if(m)ACT['w-area']({dataset:{a:m}})}
+});
+window.addEventListener('resize',()=>{if(!$('#welcome').hidden)setPulse(W.i===0?0.04:(W.i+1)/6)});
+/* ====== Home ====== */
+addI({en:{
+ scoreHow:'How the score is made',pMove:'Getting around',pClean:'Cleanliness',pUtil:'Water & power',pAir:'Air',thisWeek:'this week',scoreCap:'The score is the average of four parts. Tap a bar to see what lifts it.',
+ busy:'Busy',clear:'Moving well',heavy:'Heavy',vanAt:'Van at {t}',lateOnce:'Thursday was late',onTime:'On time all week',sunNow:'from the sun',sunCap:"{p}% of {city}'s power comes from the sun today.",
+ trafCap:'Roads fill up around {t}. Leave before then.',airCap:'Dial runs from 0 (clean) to 300 (very bad).',garCap:'Bars show minutes after the planned time. Red means late.',
+ waterAlert:'Water at {area} tomorrow starts 40 minutes late, at {t}.',alert:'Alert',nearCap:'Numbers match the list below. Tap a pin to see it.',pNew:'New',pSeen:'Seen',pFix:'Being fixed',pDone:'Fixed',event:'Event',
+ aiNote:'Made from city data. This is a demo model.',confidence:'{n}% sure',whyBtn:'Ask why',hot:'Most upvoted near you',topCap:'Cleanest areas this week',
+ srcTraffic:'City traffic police, live',srcAir:'Pollution control board sensors',srcGarbage:'Municipal van GPS',srcPower:'Grid operator and rooftop meters',srcScore:'Average of the four city feeds',srcNear:'Citizen reports and city work orders',
+ leaveAt:'Leave at {t}',leaveSub:'on {road}',saveMin:'saves {n} min',waterWin:'Water {a} to {b}',waterSub:'Fill tanks early',
+ airIs:'Air is {s}',airSub:'AQI {n}',cutAt:'Power cut {a} to {b}',cutSub:'{why}. Charge devices before.',evSub:'near {a}',safeT:'Lights checked on your road',safeS:'All working as of last night',
+ conn:'Connected feeds',notThere:'{f} is not connected for {city} yet.',
+},hi:{
+ scoreHow:'स्कोर कैसे बनता है',pMove:'आना-जाना',pClean:'सफ़ाई',pUtil:'पानी और बिजली',pAir:'हवा',thisWeek:'इस हफ़्ते',scoreCap:'स्कोर चार हिस्सों का औसत है। बार छूकर देखें क्या बढ़ाता है।',
+ busy:'भीड़',clear:'आराम से चल रहा',heavy:'बहुत भारी',vanAt:'गाड़ी {t} पर',lateOnce:'गुरुवार को देर हुई',onTime:'पूरे हफ़्ते समय पर',sunNow:'सूरज से',sunCap:'आज {city} की {p}% बिजली सूरज से आ रही है।',
+ trafCap:'सड़कें {t} के आसपास भर जाती हैं। उससे पहले निकलें।',airCap:'डायल 0 (साफ़) से 300 (बहुत ख़राब) तक है।',garCap:'बार बताते हैं तय समय के कितने मिनट बाद आई। लाल मतलब देर।',
+ waterAlert:'कल {area} में पानी 40 मिनट देर से, {t} पर आएगा।',alert:'अलर्ट',nearCap:'नंबर नीचे की सूची से मिलते हैं। पिन छूकर देखें।',pNew:'नई',pSeen:'देखी गई',pFix:'ठीक हो रही',pDone:'ठीक हुई',event:'कार्यक्रम',
+ aiNote:'शहर के डेटा से बना। यह डेमो मॉडल है।',confidence:'{n}% भरोसा',whyBtn:'क्यों पूछें',hot:'आपके पास सबसे ज़्यादा वोट',topCap:'इस हफ़्ते सबसे साफ़ इलाके',
+ srcTraffic:'शहर ट्रैफिक पुलिस, लाइव',srcAir:'प्रदूषण बोर्ड के सेंसर',srcGarbage:'नगर निगम गाड़ी GPS',srcPower:'ग्रिड ऑपरेटर और छत के मीटर',srcScore:'शहर के चार डेटा का औसत',srcNear:'नागरिक शिकायतें और निगम के काम',
+ leaveAt:'{t} पर निकलें',leaveSub:'{road} पर',saveMin:'{n} मिनट बचेंगे',waterWin:'पानी {a} से {b}',waterSub:'टंकी जल्दी भर लें',
+ airIs:'हवा {s}',airSub:'AQI {n}',cutAt:'बिजली कटौती {a} से {b}',cutSub:'{why}। पहले चार्ज कर लें।',evSub:'{a} के पास',safeT:'आपकी सड़क की लाइटें जाँची गईं',safeS:'कल रात तक सब चालू',
+ conn:'जुड़े हुए डेटा',notThere:'{city} के लिए {f} अभी जुड़ा नहीं है।',
+}});
+
+const trafLbl=v=>v>70?{c:'bad',k:'heavy'}:v>45?{c:'warn',k:'busy'}:{c:'good',k:'clear'};
+function dayItems(){
+  const D=sim(),Lv=leaveAt(),c=city(),out=[];
+  S.prefs.forEach(k=>{
+    if(!has(k))return;
+    if(k==='move')out.push({k,ic:'travel',time:fmtT(Lv.dep),title:t('leaveAt',{t:fmtT(Lv.dep)}),sub:t('leaveSub',{road:c.road})+' · '+t('saveMin',{n:Lv.saved})});
+    if(k==='garbage')out.push({k,ic:'waste',time:fmtT(D.vanMin),title:t('vanAt',{t:fmtT(D.vanMin)}),sub:areaName(curArea())});
+    if(k==='water')out.push({k,ic:'drop',time:fmtT(D.waterS),title:t('waterWin',{a:fmtT(D.waterS),b:fmtT(D.waterS+90)}),sub:t('waterSub')});
+    if(k==='air'){const a=aqiInfo(D.aqi);out.push({k,ic:'wind',time:'AQI '+D.aqi,title:t('airIs',{s:a[S.lang==='hi'?'hi':'en']}),sub:S.lang==='hi'?'टहलने का अच्छा समय: शाम 5 से 7':'Best time for a walk: 5 to 7 PM'});}
+    if(k==='power')out.push({k,ic:'bolt',time:fmtT(D.cuts[0].s),title:t('cutAt',{a:fmtT(D.cuts[0].s),b:fmtT(D.cuts[0].e)}),sub:t('cutSub',{why:L(D.cuts[0].why)})});
+    if(k==='events')out.push({k,ic:'cal',time:L(D.events[0].when).split(' · ')[0],title:L(D.events[0].n),sub:t('evSub',{a:areaName(D.events[0].at)})});
+    if(k==='safety')out.push({k,ic:'shield',time:S.lang==='hi'?'रात':'Night',title:t('safeT'),sub:t('safeS')});
+  });
+  return out;
+}
+const dayRow=it=>`<div class="li"><div class="ic">${ico(it.ic)}</div><div class="grow"><b>${esc(it.title)}</b><div class="faint" style="font-size:.82rem">${esc(it.sub)}</div></div><div class="time num">${esc(it.time)}</div></div>`;
+function applyPrefs2(){}
+function insights(){
+  const D=sim(),out=[],h=D.nowI;let best=Math.max(h,6),bv=1e9;for(let i=Math.max(h,6);i<=21;i++)if(D.aqiH[i]<bv){bv=D.aqiH[i];best=i}
+  out.push({ic:'wind',conf:86,q:'air',t:{en:`Air will be cleanest around ${fmtT(best*60)} (AQI near ${bv}). Plan walks and cycling then.`,hi:`हवा ${fmtT(best*60)} के आसपास सबसे साफ़ होगी (AQI करीब ${bv})। टहलना या साइकिल तब रखें।`}});
+  if(has('garbage'))out.push({ic:'waste',conf:78,q:'garbage',t:{en:'The van was late once in the last 7 days on your street. If it is late again, we will flag it to the ward office for you.',hi:'पिछले 7 दिन में आपकी गली में गाड़ी एक बार देर से आई। फिर देर हुई तो हम वार्ड दफ़्तर को बता देंगे।'}});
+  if(has('power')){const pk=D.solar.indexOf(Math.max(...D.solar));out.push({ic:'bolt',conf:81,q:'power',t:{en:`Run the washing machine or geyser around ${fmtT(pk*60-60)} to ${fmtT(pk*60+60)}. Most of the power is from the sun then.`,hi:`वॉशिंग मशीन या गीज़र ${fmtT(pk*60-60)} से ${fmtT(pk*60+60)} के बीच चलाएँ। तब ज़्यादातर बिजली सूरज की होती है।`}})}
+  const top=live().filter(r=>r.st<3).sort((a,b)=>b.votes-a.votes)[0];
+  if(top)out.push({ic:'users',conf:92,q:'report',t:{en:`${top.votes} neighbours upvoted “${top.title.en}”. More upvotes move it up the city’s fix list.`,hi:`${top.votes} पड़ोसियों ने “${top.title.hi}” को वोट दिया। ज़्यादा वोट से यह निगम की सूची में ऊपर जाएगा।`}});
+  return out;
+}
+function homeTile(k){
+  const D=sim(),c=city();
+  const wrap=(feed,ic,title,body,cap,src,to)=>has(feed)?`<button class="card tile" data-act="tile" data-to="${to}" type="button"><div class="row between"><span class="eyebrow">${title}</span>${ico(ic,'faint').replace('<svg','<svg width="18" height="18"')}</div>${body}<p class="cap" style="margin-top:2px">${cap}</p><p class="src">${t('source')}: ${src}</p></button>`
+   :`<div class="card tile off flat"><div class="row between"><span class="eyebrow">${title}</span>${ico(ic,'faint').replace('<svg','<svg width="18" height="18"')}</div><p class="muted" style="margin-top:8px">${t('notThere',{f:title,city:cname()})}</p></div>`;
+  if(k==='traffic'){const v=D.traffic[D.nowI],tl=trafLbl(v),pkh=D.traffic.indexOf(Math.max(...D.traffic.slice(14,22)));
+    return wrap('move','travel',t('traffic'),`<div class="row between"><span class="tv">${t(tl.k)}</span><span class="pill ${tl.c}">${v}%</span></div>${chLine(D.traffic,{nowI:D.nowI,from:5,to:22})}`,t('trafCap',{t:fmtT(pkh*60-30)}),t('srcTraffic'),'travel')}
+  if(k==='air'){const a=aqiInfo(D.aqi);return wrap('air','wind',t('air'),`<div class="row between"><span class="tv">${D.aqi}</span><span class="pill ${a.c}">${S.lang==='hi'?a.hi:a.en}</span></div>${chDial(D.aqi)}`,t('airCap'),t('srcAir'),'air')}
+  if(k==='garbage'){const late=D.days.some(x=>x.late);return wrap('garbage','waste',t('garbage'),`<div class="row between"><span class="tv">${t('vanAt',{t:fmtT(D.vanMin)})}</span></div>${chBars7(D.days)}`,late?t('lateOnce'):t('onTime'),t('srcGarbage'),'waste')}
+  if(k==='power')return wrap('power','bolt',t('power'),`<div class="row" style="gap:14px">${chRing(D.solarShare,{sub:t('sunNow')})}<div class="grow"><span class="tv">${D.solarShare}%</span><div class="muted" style="font-size:.85rem">${t('sunNow')}</div></div></div>`,t('sunCap',{p:D.solarShare,city:cname()}),t('srcPower'),'waste');
+}
+function nearPins(){
+  const a=curArea(),arr=live().slice().sort((x,y)=>(y.area===a)-(x.area===a)||y.votes-x.votes).slice(0,5);
+  const pins=arr.map((r,i)=>({x:r.x,y:r.y,st:r.st,n:i+1,label:L(r.title),r}));
+  return pins;
+}
+PAGES.home=function(){
+  const D=sim(),c=city(),h=new Date().getHours(),g=h<12?'gm':h<17?'ga':'ge',day=dayItems();
+  const parts=[['pMove',D.parts.move],['pClean',D.parts.clean],['pUtil',D.parts.util],['pAir',D.parts.air]];
+  const order=['traffic','air','garbage','power'].sort((a,b)=>{const m={traffic:'move',air:'air',garbage:'garbage',power:'power'};return (S.prefs.includes(m[b])?1:0)-(S.prefs.includes(m[a])?1:0)});
+  const pins=nearPins(),ev=D.events[0];
+  const evp={x:318,y:70,ev:true,n:'★',label:L(ev.n)};
+  const wa=has('water')?`<div class="card sun row" style="gap:14px">${ico('drop').replace('<svg','<svg width="26" height="26" style="flex:none"')}<div class="grow"><span class="pill warn">${t('alert')}</span><div style="font-weight:700;margin-top:4px">${t('waterAlert',{area:esc(areaName(curArea())),t:fmtT(D.waterS+40)})}</div></div></div>`:'';
+  return`<div class="stack">
+  <section style="padding:6px 0 4px"><div class="eyebrow">${new Date().toLocaleDateString(S.lang==='hi'?'hi-IN':'en-IN',{weekday:'long',day:'numeric',month:'long'})}</div>
+   <h1 class="h1" style="margin-top:6px">${t(g)}, ${esc(cname())}.</h1>
+   <svg class="squiggle" viewBox="0 0 150 14" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M3 9C14 2 22 14 34 7S54 2 65 8s22 6 32-1 24-3 33 2 14 1 18-2"/></svg>
+   <p class="muted" style="margin-top:8px">${t('greetSub',{area:esc(areaName(curArea()))})}</p></section>
+  ${wa}
+  <div class="g2">
+   <section class="card"><div class="sechead" style="margin:0 0 4px"><h2 class="h2">${t('yourDay')}</h2><span class="pill good"><i class="live"></i>&nbsp;${t('now')}</span></div><div class="list">${day.map(dayRow).join('')||`<p class="muted">${t('notThere',{f:'',city:cname()})}</p>`}</div></section>
+   <section class="card brand" data-open="${S.scoreOpen}"><div class="row between"><span class="eyebrow">${t('cityScore')} · ${esc(cname())}</span>${chSpark(D.wscore,{col:'var(--sun)'})}</div>
+    <div class="row" style="align-items:flex-end;gap:10px;margin-top:6px"><span class="big num" id="scoreN" data-n="${D.score}">${D.score}</span><span class="muted" style="margin-bottom:6px">/100 · +${D.wscore[6]-D.wscore[0]>0?D.wscore[6]-D.wscore[0]:1} ${t('thisWeek')}</span></div>
+    <div class="stack" style="gap:12px;margin-top:14px">${parts.map(([k,v],i)=>`<div><div class="row between" style="font-size:.85rem"><span>${t(k)}</span><b class="num">${v}</b></div><div class="bar" style="margin-top:5px"><i style="width:${v}%"></i></div></div>`).join('')}</div>
+    <p class="cap" style="color:var(--onbrand2)">${t('scoreCap')}</p><p class="src" style="color:var(--onbrand2)">${t('source')}: ${t('srcScore')}</p></section>
+  </div>
+  <div class="sechead"><h2 class="h2">${t('cityNow')}</h2><span class="faint" style="font-size:.8rem">${new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</span></div>
+  <div class="g4">${order.map(homeTile).join('')}</div>
+  <div class="g2">
+   <section class="card"><div class="sechead" style="margin:0 0 10px"><h2 class="h2">${t('nearYou')}</h2></div>
+    <div class="mapwrap" id="nearmap">${cityMap({pins:[...pins,evp]})}<div class="maplinks"><a href="${mapsUrl(areaName(curArea())+', '+cname())}" target="_blank" rel="noopener">${t('openMaps')}</a></div></div>
+    <div class="legend"><span><i class="f-bad" style="background:var(--bad)"></i>${t('pNew')}</span><span><i style="background:var(--sun)"></i>${t('pFix')}</span><span><i style="background:var(--leaf)"></i>${t('pDone')}</span><span><i style="background:var(--info)"></i>${t('event')}</span></div>
+    <p class="cap">${t('nearCap')}</p>
+    <div class="list" id="nearlist" style="margin-top:6px">${pins.map((p,i)=>`<div class="li" data-i="${i}"><span class="numpin ${['nb-new','nb-new','nb-doing','nb-fix'][p.st]}">${i+1}</span><div class="grow"><b style="font-size:.92rem">${esc(p.label)}</b><div class="faint" style="font-size:.78rem">${esc(areaName(p.r.area))} · ${p.r.votes} ▲</div></div><span class="pill ${['bad','bad','warn','good'][p.st]}">${t(['pNew','pSeen','pFix','pDone'][p.st])}</span></div>`).join('')}
+     <div class="li"><span class="numpin nb-event">★</span><div class="grow"><b style="font-size:.92rem">${esc(L(ev.n))}</b><div class="faint" style="font-size:.78rem">${esc(L(ev.when))} · ${esc(areaName(ev.at))}</div></div><span class="pill info">${t('event')}</span></div></div>
+    <p class="src">${t('source')}: ${t('srcNear')}</p></section>
+   <section class="card"><div class="sechead" style="margin:0 0 10px"><h2 class="h2">${ico('spark').replace('<svg','<svg width="20" height="20" style="vertical-align:-3px;color:var(--sun)"')} ${t('aiIns')}</h2></div>
+    <div class="stack" style="gap:12px">${insights().map(i=>`<div class="cmt" style="padding:12px 14px"><div class="row" style="align-items:flex-start;gap:12px"><div class="ic" style="width:36px;height:36px;border-radius:11px;background:var(--surface);display:grid;place-items:center;flex:none">${ico(i.ic).replace('<svg','<svg width="19" height="19"')}</div><div class="grow"><p>${esc(L(i.t))}</p><div class="row wrap" style="margin-top:8px"><span class="pill mute">${t('confidence',{n:i.conf})}</span><button class="btn sm ghost" data-act="ask-q" data-q="${i.q}" type="button">${t('whyBtn')}</button></div></div></div></div>`).join('')}</div>
+    <p class="src">${t('aiNote')}</p></section>
+  </div>
+  <div class="g2">
+   <section class="card"><h2 class="h2" style="margin-bottom:10px">${t('topCap')}</h2><div class="list">${D.ranking.map((r,i)=>`<div class="li"><span class="rank" style="width:30px;height:30px;font-size:.9rem;${i>2?'background:var(--surface2);color:var(--ink2)':''}">${i+1}</span><div class="grow"><b>${esc(areaName(r.a))}</b><div class="bar ${i>2?'sun':''}" style="margin-top:6px"><i style="width:${r.s}%"></i></div></div><b class="num">${r.s}</b></div>`).join('')}</div></section>
+   <section class="stack"><h2 class="h2">${t('hot')}</h2>${live().filter(r=>r.st<3).sort((a,b)=>b.votes-a.votes).slice(0,2).map(r=>postCard(r,{compact:true})).join('')}</section>
+  </div></div>`;
+};
+AFTER.home=function(){
+  const n=$('#scoreN');if(n){const to=+n.dataset.n,t0=performance.now();const f=now=>{const p=clamp((now-t0)/900,0,1);n.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)};requestAnimationFrame(f)}
+};
+ACT.tile=el=>{const to=el.dataset.to;if(to==='air')askOpen(S.lang==='hi'?'आज हवा कैसी है?':'How is the air today?');else go(to)};
+ACT.pin=el=>{const i=+el.dataset.i;$$('#nearlist .li').forEach(x=>x.style.background='');const row=$(`#nearlist .li[data-i="${i}"]`);if(row){row.style.background='var(--leafsoft)';row.style.borderRadius='12px';row.scrollIntoView({block:'nearest',behavior:'smooth'})}};
+/* ====== Travel ====== */
+addI({en:{
+ arrive:'Arrive {t}',vsLate:'{n} min faster than leaving at {t}',otherWays:'Other ways',byBus:'Bus {no}',byAuto:'Auto or cab',byBike:'Two-wheeler',directions:'Directions',
+ layers:'Map layers',lTraffic:'Traffic',lBus:'Buses',lPark:'Parking',lEv:'Charging',hourly:'{road}, hour by hour',hourlyCap:'Red bars are the slowest hours. The darker bar is now.',
+ busNow:'Buses near you',seatsFree:'Seats free',someSeats:'Some seats',veryFull:'Very full',minAway:'{n} min',airWay:'Air along your way',airWayCap:'Your road passes one busy junction. Close windows there.',
+ parking:'Parking',free:'{n} free of {c}',charging:'Charging points',srcBus:'City bus GPS',
+},hi:{
+ arrive:'{t} पहुँचें',vsLate:'{t} पर निकलने से {n} मिनट जल्दी',otherWays:'और रास्ते',byBus:'बस {no}',byAuto:'ऑटो या कैब',byBike:'दोपहिया',directions:'रास्ता देखें',
+ layers:'नक्शे की परतें',lTraffic:'ट्रैफिक',lBus:'बसें',lPark:'पार्किंग',lEv:'चार्जिंग',hourly:'{road}, हर घंटे',hourlyCap:'लाल बार सबसे धीमे घंटे हैं। गहरा बार अभी का है।',
+ busNow:'पास की बसें',seatsFree:'सीटें खाली',someSeats:'कुछ सीटें',veryFull:'बहुत भीड़',minAway:'{n} मिनट',airWay:'रास्ते की हवा',airWayCap:'रास्ते में एक भीड़ वाला चौराहा है। वहाँ खिड़की बंद रखें।',
+ parking:'पार्किंग',free:'{c} में से {n} खाली',charging:'चार्जिंग पॉइंट',srcBus:'सिटी बस GPS',
+}});
+PAGES.travel=function(){
+  const D=sim(),c=city(),Lv=leaveAt();
+  if(!has('move'))return`<div class="card"><h1 class="h2">${t('travel')}</h1><p class="muted">${t('notThere',{f:t('traffic'),city:cname()})}</p></div>`;
+  const lay=[['traffic','lTraffic'],['bus','lBus'],['park','lPark'],['ev','lEv']],cw=['','seatsFree','someSeats','veryFull'];
+  const ci=c.areas.indexOf(curArea()),dest=c.areas[((ci<0?0:ci)+2)%c.areas.length];
+  return`<div class="stack">
+  <section class="card brand"><div class="eyebrow">${esc(areaName(curArea()))} → ${esc(areaName(dest))}</div>
+   <h1 class="h1" style="margin-top:8px">${t('leaveAt',{t:fmtT(Lv.dep)})}</h1>
+   <p style="margin-top:8px;font-size:1.05rem">${t('arrive',{t:fmtT(Lv.arr)})} · <span class="muted">${t('vsLate',{n:Lv.saved,t:fmtT(520)})}</span></p>
+   <div class="divider" style="background:var(--brandline);margin:14px 0"></div><div class="eyebrow">${t('otherWays')}</div>
+   <div class="g4" style="margin-top:10px;gap:10px">${[['bus',t('byBus',{no:D.crowd[0].no}),Lv.mine+9],['car',t('byAuto'),Lv.mine+2],['travel',t('byBike'),Math.round(Lv.mine*.8)]].map(([i,l,m])=>`<div class="row" style="gap:10px">${ico(i).replace('<svg','<svg width="20" height="20"')}<span class="grow">${esc(l)}</span><b class="num">${m} min</b></div>`).join('')}</div>
+   <a class="btn onbrand sm" style="margin-top:14px;text-decoration:none" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(curArea()+', '+c.n.en)}&destination=${encodeURIComponent(dest+', '+c.n.en)}">${t('directions')} ${ico('ext').replace('<svg','<svg width="15" height="15"')}</a></section>
+  <div class="g2">
+   <section class="card"><div class="row between wrap" style="margin-bottom:10px"><h2 class="h2">${t('layers')}</h2></div>
+    <div class="seg" role="tablist" style="margin-bottom:12px">${lay.map(([k,l])=>`<button role="tab" aria-selected="${S.mapLayer===k}" data-act="layer" data-k="${k}" type="button">${t(l)}</button>`).join('')}</div>
+    <div class="mapwrap">${cityMap({layer:S.mapLayer})}<div class="maplinks"><a href="${mapsUrl(curArea()+', '+c.n.en)}" target="_blank" rel="noopener">${t('openMaps')}</a></div></div>
+    ${S.mapLayer==='traffic'?`<div class="legend"><span><i style="background:var(--leaf)"></i>${t('clear')}</span><span><i style="background:var(--sun)"></i>${t('busy')}</span><span><i style="background:var(--bad)"></i>${t('heavy')}</span></div>`:''}
+    <p class="src">${t('source')}: ${t('srcTraffic')}</p></section>
+   <section class="card"><h2 class="h2">${t('hourly',{road:esc(c.road)})}</h2>${chHours(D.traffic,{nowI:D.nowI,badAbove:70,unit:'%'})}<p class="cap">${t('hourlyCap')}</p><p class="src">${t('source')}: ${t('srcTraffic')}</p></section>
+  </div>
+  <div class="g2">
+   <section class="card"><h2 class="h2" style="margin-bottom:4px">${t('busNow')}</h2><div class="list">${D.crowd.map(b=>`<div class="li"><div class="ic">${ico('bus')}</div><div class="grow"><b>${esc(b.no)} → ${esc(areaName(b.to))}</b><div class="row" style="gap:8px;margin-top:4px"><span class="meter l${b.lvl}"><i></i><i></i><i></i></span><span class="faint" style="font-size:.8rem">${t(cw[b.lvl])}</span></div></div><div class="time num">${t('minAway',{n:b.eta[0]})}</div></div>`).join('')}</div><p class="src">${t('source')}: ${t('srcBus')}</p></section>
+   <section class="card"><h2 class="h2" style="margin-bottom:10px">${t('airWay')}</h2>${chHBars([areaName(curArea()),c.road+(S.lang==='hi'?' चौराहा':' junction'),areaName(dest)].map((x,i)=>{const v=D.aqi+[-8,34,-15][i];return{l:x,v,txt:'AQI '+v,cls:v>150?'bad':v>100?'sun':''}}))}<p class="cap">${t('airWayCap')}</p>
+    <div class="divider" style="margin:14px 0"></div><h3 class="h3" style="margin-bottom:8px">${t('parking')}</h3>${chHBars(D.park.map(p=>({l:p.n,v:p.free,txt:t('free',{n:p.free,c:p.cap}),cls:p.free<p.cap*.2?'bad':'info'})))}
+    <h3 class="h3" style="margin:14px 0 8px">${t('charging')}</h3>${D.chg.map(x=>`<div class="row between" style="font-size:.9rem;padding:4px 0"><span>${ico('bolt').replace('<svg','<svg width="16" height="16" style="color:var(--sun)"')}</span><span class="grow">${esc(x.n)}</span><b class="num">${x.free}/${x.of}</b></div>`).join('')}</section>
+  </div></div>`;
+};
+ACT.layer=el=>{S.mapLayer=el.dataset.k;render(true)};
+
+/* ====== Waste & Power ====== */
+addI({en:{
+ vanTitle:'Garbage van',vanComing:'{n} min away',vanHere:'On your street now',vanDone:'Done for today. Next: tomorrow {t}',vanDepot:'Leaves depot soon',ready:"I'll be ready",simVan:'Play the morning (demo)',vanAlert:'Garbage van in 10 minutes. Keep wet and dry waste apart.',readyOk:'Noted. The driver sees one more home ready.',
+ tasks:"Today's tasks",tasksCap:'Small things that keep your street clean. Each one adds to your streak.',pts:'{n} points',
+ t_seg:'Keep wet and dry waste apart',t_van:'Hand over garbage at {t}',t_water:'Fill the water tank by {t}',t_peak:'Avoid heavy appliances 6 to 10 PM',t_tree:'Water the tree outside your home',
+ whichBin:'Which dustbin?',binPh:'Type a thing, like bottle or medicine',binNone:"We don't know that yet. Keep it separate and ask the van driver.",
+ wet:'Green · wet',dry:'Blue · dry',haz:'Red · hazardous',ew:'Black · e-waste',goes:"Where {city}'s garbage goes",goesCap:'60% is composted or recycled. The rest goes to energy plants and the landfill.',
+ compost:'Composted',recyc:'Recycled',wte:'Waste-to-energy',landfill:'Landfill',sunPower:'Clean power by hour',sunCap:'Bars are taller when there is more sun.',
+ yourPower:'Your power this week',yourCap:'You used less than your neighbours on most days.',streak:'Sorting streak',streakCap:'{n} of the last 21 days sorted right. Keep the yellow dots going.',cuts:'Planned power cuts',
+},hi:{
+ vanTitle:'कचरा गाड़ी',vanComing:'{n} मिनट दूर',vanHere:'अभी आपकी गली में',vanDone:'आज का काम हो गया। अगली: कल {t}',vanDepot:'जल्द डिपो से निकलेगी',ready:'मैं तैयार रहूँगा',simVan:'सुबह चलाकर देखें (डेमो)',vanAlert:'कचरा गाड़ी 10 मिनट में। गीला-सूखा अलग रखें।',readyOk:'नोट हुआ। ड्राइवर को एक और घर तैयार दिखेगा।',
+ tasks:'आज के काम',tasksCap:'छोटे काम जो गली साफ़ रखते हैं। हर काम से आपकी लय बढ़ती है।',pts:'{n} अंक',
+ t_seg:'गीला और सूखा कचरा अलग रखें',t_van:'{t} पर कचरा गाड़ी को दें',t_water:'{t} तक पानी की टंकी भरें',t_peak:'शाम 6 से 10 भारी उपकरण न चलाएँ',t_tree:'घर के बाहर पेड़ को पानी दें',
+ whichBin:'कौन सा डिब्बा?',binPh:'कोई चीज़ लिखें, जैसे बोतल या दवा',binNone:'यह हमें अभी नहीं पता। इसे अलग रखें और गाड़ी वाले से पूछें।',
+ wet:'हरा · गीला',dry:'नीला · सूखा',haz:'लाल · ख़तरनाक',ew:'काला · ई-कचरा',goes:'{city} का कचरा कहाँ जाता है',goesCap:'60% खाद या रीसायकल होता है। बाकी ऊर्जा संयंत्र और लैंडफ़िल में जाता है।',
+ compost:'खाद',recyc:'रीसायकल',wte:'कचरे से बिजली',landfill:'लैंडफ़िल',sunPower:'हर घंटे साफ़ बिजली',sunCap:'जब धूप ज़्यादा, तब बार ऊँचे।',
+ yourPower:'इस हफ़्ते आपकी बिजली',yourCap:'ज़्यादातर दिन आपने पड़ोसियों से कम बिजली ली।',streak:'छँटाई की लय',streakCap:'पिछले 21 में से {n} दिन सही छँटाई। पीले बिंदु जारी रखें।',cuts:'तय बिजली कटौती',
+}});
+const BINS=[['Plastic bottle','प्लास्टिक बोतल','dry'],['Newspaper','अख़बार','dry'],['Milk packet (rinsed)','दूध की थैली (धुली)','dry'],['Glass jar','काँच का जार','dry'],['Vegetable peels','सब्ज़ी के छिलके','wet'],['Tea leaves','चाय पत्ती','wet'],['Eggshells','अंडे के छिलके','wet'],['Leftover food','बचा खाना','wet'],['Flowers from puja','पूजा के फूल','wet'],['Medicine','दवा','haz'],['Diapers','डायपर','haz'],['Sanitary pads','सैनिटरी पैड','haz'],['Batteries','बैटरी','ew'],['Bulbs and tubelights','बल्ब और ट्यूबलाइट','ew'],['Old phone or charger','पुराना फ़ोन या चार्जर','ew']];
+const BINC={wet:'green',dry:'blue',haz:'red',ew:'black'};
+const TK=()=>new Date().toDateString();
+let VAN={p:null,sim:false,alerted:false};
+function vanState(){const D=sim(),m=D.vanMin-nowMin();if(VAN.sim)return{p:VAN.p,txt:VAN.p>=1?t('vanHere'):t('vanComing',{n:Math.max(1,Math.round((1-VAN.p)*60))})};
+  if(m>60)return{p:0,txt:t('vanDepot')};if(m>0)return{p:1-m/60,txt:t('vanComing',{n:m})};if(m>-30)return{p:1,txt:t('vanHere')};return{p:1,txt:t('vanDone',{t:fmtT(D.vanMin)}),done:true}}
+function vanSVG(p){const pts=[[20,70],[90,70],[120,30],[220,30],[250,70],[340,70]];const d=pts.map((q,i)=>(i?'L':'M')+q.join(' ')).join('');
+  return`<svg class="chart" viewBox="0 0 360 100" id="vansvg"><path d="${d}" fill="none" stroke="var(--brandline)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path id="vanpath" d="${d}" fill="none" stroke="var(--sun)" stroke-width="4" stroke-dasharray="2 9" stroke-linecap="round"/>
+  ${pts.slice(1,-1).map(q=>`<circle cx="${q[0]}" cy="${q[1]}" r="5" fill="var(--onbrand2)"/>`).join('')}<circle cx="340" cy="70" r="13" fill="var(--sun)" class="pulse-ring" opacity=".5"/><circle cx="340" cy="70" r="9" fill="var(--sun)"/><text x="352" y="95" text-anchor="end" class="t-on" style="font-weight:700">${S.lang==='hi'?'आपका घर':'Your home'}</text><text x="8" y="95" class="t-on2">${S.lang==='hi'?'डिपो':'Depot'}</text>
+  <g id="van"><rect x="-15" y="-11" width="30" height="20" rx="5" fill="var(--onbrand)"/><rect x="5" y="-8" width="8" height="7" rx="2" fill="var(--brand)"/><circle cx="-8" cy="10" r="4" fill="var(--brand)"/><circle cx="8" cy="10" r="4" fill="var(--brand)"/></g></svg>`}
+function placeVan(p){const pa=$('#vanpath'),v=$('#van');if(!pa||!v)return;const L0=pa.getTotalLength(),pt=pa.getPointAtLength(L0*clamp(p,0,1));v.setAttribute('transform',`translate(${pt.x} ${pt.y-6})`)}
+PAGES.waste=function(){
+  const D=sim(),done=store.get('tasks',{})[TK()]||[],vs=vanState(),q=(S.binQ||'').trim().toLowerCase();
+  const tasks=[['seg','t_seg'],['van','t_van',{t:fmtT(D.vanMin)}],['water','t_water',{t:fmtT(D.waterS+60)}],['peak','t_peak'],['tree','t_tree']].filter(x=>(x[0]!=='van'||has('garbage'))&&(x[0]!=='water'||has('water')));
+  const bins=BINS.filter(b=>!q||b[0].toLowerCase().includes(q)||b[1].includes(q));
+  const streakN=D.streak.filter(Boolean).length+(done.includes('seg')?1:0);
+  const gar=has('garbage'),pow=has('power');
+  return`<div class="stack">
+  <div class="g2">
+   ${gar?`<section class="card brand"><div class="row between"><span class="eyebrow">${t('vanTitle')} · ${esc(areaName(curArea()))}</span><span class="pill" style="background:var(--brandline);color:var(--onbrand)"><i class="live"></i>&nbsp;GPS</span></div>
+    <h1 class="h1" style="margin-top:8px">${t('vanAt',{t:fmtT(D.vanMin)})}</h1><p id="vantxt" style="font-size:1.05rem;margin-top:6px">${esc(vs.txt)}</p>
+    <div style="margin:10px 0 6px">${vanSVG(vs.p)}</div>
+    <div class="row wrap"><button class="btn onbrand" data-act="van-ready" type="button">${ico('check').replace('<svg','<svg width="18" height="18"')}${t('ready')}</button><button class="btn sm" style="background:var(--brandline);color:var(--onbrand)" data-act="van-sim" type="button">${ico('clock').replace('<svg','<svg width="16" height="16"')}${t('simVan')}</button></div>
+    <p class="src" style="color:var(--onbrand2)">${t('source')}: ${t('srcGarbage')}</p></section>`:`<section class="card"><h2 class="h2">${t('vanTitle')}</h2><p class="muted" style="margin-top:6px">${t('notThere',{f:t('garbage'),city:cname()})}</p></section>`}
+   <section class="card"><div class="row between"><h2 class="h2">${t('tasks')}</h2><span class="pill good">${t('pts',{n:done.length*10})}</span></div><p class="cap" style="margin-bottom:6px">${t('tasksCap')}</p>
+    <div class="list">${tasks.map(([k,l,v])=>`<button class="li" style="width:100%;text-align:left" data-act="task" data-k="${k}" type="button" aria-pressed="${done.includes(k)}"><span class="check ${done.includes(k)?'on':''}">${ico('check')}</span><span class="grow" style="${done.includes(k)?'text-decoration:line-through;color:var(--ink3)':''}">${esc(t(l,v))}</span><span class="faint" style="font-size:.8rem">+10</span></button>`).join('')}</div></section>
+  </div>
+  <div class="g2">
+   <section class="card"><h2 class="h2">${t('whichBin')}</h2><div class="row" style="margin:12px 0;position:relative"><input class="field" id="binq" type="search" value="${esc(S.binQ||'')}" placeholder="${esc(t('binPh'))}" aria-label="${esc(t('whichBin'))}" autocomplete="off"></div>
+    <div class="list" id="binlist">${binList(bins)}</div></section>
+   <section class="card"><h2 class="h2">${t('goes',{city:esc(cname())})}</h2><div style="margin-top:12px">${chStack(D.dest.map((d,i)=>({v:d.v,l:t(['compost','recyc','wte','landfill'][i])})))}</div><p class="cap">${t('goesCap')}</p>
+    <div class="divider" style="margin:16px 0"></div>
+    <div class="card brand" style="box-shadow:none"><div class="row between"><h3 class="h3">${t('streak')}</h3><b class="big" style="font-size:1.8rem">${streakN}</b></div>
+     <div class="cal" style="margin-top:12px">${D.streak.map((ok,i)=>`<i class="${ok||(i===20&&done.includes('seg'))?'ok':''} ${i===20?'today':''}"></i>`).join('')}</div><p class="cap" style="color:var(--onbrand2)">${t('streakCap',{n:streakN})}</p></div></section>
+  </div>
+  ${pow?`<div class="g2">
+   <section class="card"><h2 class="h2">${t('sunPower')}</h2>${chHours(D.solar,{nowI:D.nowI,from:5,to:20,cls:'sun'})}<p class="cap">${t('sunCap')}</p><p class="src">${t('source')}: ${t('srcPower')}</p></section>
+   <section class="card"><h2 class="h2">${t('yourPower')}</h2>${chCompare(D.you,D.nb)}<p class="cap">${t('yourCap')}</p>
+    <h3 class="h3" style="margin:14px 0 6px">${t('cuts')}</h3>${D.cuts.map(c=>`<div class="li"><div class="ic">${ico('bolt')}</div><div class="grow"><b>${fmtT(c.s)} – ${fmtT(c.e)}</b><div class="faint" style="font-size:.82rem">${esc(L(c.why))} · ${esc(areaName(curArea()))}</div></div><span class="pill warn">${t('today')}</span></div>`).join('')}</section>
+  </div>`:`<section class="card"><h2 class="h2">${t('power')}</h2><p class="muted">${t('notThere',{f:t('power'),city:cname()})}</p></section>`}
+  </div>`;
+};
+function binList(bins){return bins.length?bins.map(b=>`<div class="li"><span class="grow"><b>${esc(S.lang==='hi'?b[1]:b[0])}</b></span><span class="bin ${BINC[b[2]]}">${t({wet:'wet',dry:'dry',haz:'haz',ew:'ew'}[b[2]])}</span></div>`).join(''):`<p class="muted" style="padding:10px 0">${t('binNone')}</p>`}
+AFTER.waste=function(){
+  placeVan(vanState().p);
+  every(()=>{if(VAN.sim){VAN.p=Math.min(1,VAN.p+.006);placeVan(VAN.p);const vs=vanState(),el=$('#vantxt');if(el)el.textContent=vs.txt;
+    if(!VAN.alerted&&VAN.p>=.83){VAN.alerted=true;toast(t('vanAlert'),t('ready'),()=>ACT['van-ready']())}if(VAN.p>=1)VAN.sim=false}},80);
+};
+document.addEventListener('input',e=>{if(e.target.id==='binq'){S.binQ=e.target.value;const q=S.binQ.trim().toLowerCase();$('#binlist').innerHTML=binList(BINS.filter(b=>!q||b[0].toLowerCase().includes(q)||b[1].includes(q)))}});
+ACT['van-sim']=()=>{VAN={p:.35,sim:true,alerted:false};placeVan(VAN.p)};
+ACT['van-ready']=()=>{const s=store.get('tasks',{}),k=TK();s[k]=s[k]||[];if(!s[k].includes('van'))s[k].push('van');store.set('tasks',s);toast(t('readyOk'));if(S.page==='waste'&&!VAN.sim)render(true)};
+ACT.task=el=>{const s=store.get('tasks',{}),k=TK(),a=s[k]=s[k]||[],i=a.indexOf(el.dataset.k);if(i>=0)a.splice(i,1);else a.push(el.dataset.k);store.set('tasks',s);render(true)};
+/* ====== Report + community ====== */
+addI({en:{
+ newRep:'New report',myRep:'My reports',hood:'Neighbourhood',startHow:'Start the way you like',speak:'Speak',speakD:'Any language',photo:'Photo',photoD:'We guess the problem',typeIt:'Type',typeD:'Write it out',
+ listening:'Listening… say what is wrong and where.',voiceDemo:'Voice is simulated in this demo.',heard:'We heard',aiGuess:'Looks like: {c} ({n}% sure)',what:'What is the problem?',where:'Where?',details:'A few words',detailsPh:'e.g. Drain overflowing since morning near the school gate',
+ commentRule:'Neighbours can comment for 24 hours, or until it is fixed. Up to 200 characters, 2 comments each.',sendRep:'Send report',sent:'Sent',sentSub:'Report {id} is with {body}. You will get an update when it is seen.',trackIt:'Track it',another:'Report something else',
+ sentN:'Sent',workN:'Being worked on',fixedN:'Fixed',all:'All',active:'Active',fixedF:'Fixed',searchRep:'Search by number or words',noRep:'No reports match.',
+ upvote:'Upvote',comments:'Comments',repost:'Repost',share:'Share',closeIn:'Comments close in',closed:'Comments are closed.',addCmt:'Add a comment',post:'Post',limitHit:'You have used your 2 comments here.',
+ nextStep:'Next step (demo)',showMap:'Show on map',updates:'Updates from the city',repostTitle:'Repost to your neighbourhood',repostPh:'Add a note (optional)',repostBtn:'Repost',reposted:'Reposted to {area}.',repostedBy:'Reposted by you',
+ shareTitle:'Share this',copy:'Copy text',copied:'Copied.',copyFail:'Copy is blocked here. Select the text above.',wa:'WhatsApp',x:'X',fixFast:'How fast things get fixed',fixCap:'Average days from report to fixed, last 90 days.',days:'{n} days',
+ probMap:'Problems near you',top:'Top',latest:'Latest',sumOpen:'Open now',sumWeek:'Fixed this week',sumAvg:'Avg. days to fix',sumYou:'Your upvotes',upvoted:'Upvoted. It moves up the city’s list.',by:'by {n}',you:'You',
+},hi:{
+ newRep:'नई शिकायत',myRep:'मेरी शिकायतें',hood:'मोहल्ला',startHow:'जैसे चाहें शुरू करें',speak:'बोलें',speakD:'किसी भी भाषा में',photo:'फ़ोटो',photoD:'हम समस्या पहचानेंगे',typeIt:'लिखें',typeD:'लिखकर बताएँ',
+ listening:'सुन रहे हैं… बताइए क्या ख़राब है और कहाँ।',voiceDemo:'इस डेमो में आवाज़ नकली है।',heard:'हमने सुना',aiGuess:'लगता है: {c} ({n}% भरोसा)',what:'समस्या क्या है?',where:'कहाँ?',details:'कुछ शब्द',detailsPh:'जैसे: स्कूल गेट के पास सुबह से नाली उफान पर',
+ commentRule:'पड़ोसी 24 घंटे तक या ठीक होने तक टिप्पणी कर सकते हैं। 200 अक्षर तक, हर व्यक्ति 2 टिप्पणी।',sendRep:'शिकायत भेजें',sent:'भेज दी',sentSub:'शिकायत {id} {body} के पास है। देखे जाने पर आपको ख़बर मिलेगी।',trackIt:'ट्रैक करें',another:'कुछ और बताएँ',
+ sentN:'भेजी',workN:'काम चल रहा',fixedN:'ठीक हुई',all:'सभी',active:'चालू',fixedF:'ठीक हुई',searchRep:'नंबर या शब्द से खोजें',noRep:'कोई शिकायत नहीं मिली।',
+ upvote:'वोट',comments:'टिप्पणी',repost:'रीपोस्ट',share:'शेयर',closeIn:'टिप्पणी बंद होगी',closed:'टिप्पणियाँ बंद हैं।',addCmt:'टिप्पणी लिखें',post:'भेजें',limitHit:'आपकी 2 टिप्पणियाँ हो चुकी हैं।',
+ nextStep:'अगला कदम (डेमो)',showMap:'नक्शे पर देखें',updates:'शहर से ख़बर',repostTitle:'अपने मोहल्ले में रीपोस्ट करें',repostPh:'नोट जोड़ें (चाहें तो)',repostBtn:'रीपोस्ट',reposted:'{area} में रीपोस्ट हुआ।',repostedBy:'आपने रीपोस्ट किया',
+ shareTitle:'शेयर करें',copy:'टेक्स्ट कॉपी करें',copied:'कॉपी हो गया।',copyFail:'यहाँ कॉपी बंद है। ऊपर का टेक्स्ट चुनें।',wa:'व्हाट्सऐप',x:'X',fixFast:'काम कितनी जल्दी होता है',fixCap:'शिकायत से ठीक होने तक औसत दिन, पिछले 90 दिन।',days:'{n} दिन',
+ probMap:'आपके पास की समस्याएँ',top:'सबसे ज़्यादा वोट',latest:'नई',sumOpen:'अभी खुली',sumWeek:'इस हफ़्ते ठीक',sumAvg:'ठीक होने में औसत दिन',sumYou:'आपके वोट',upvoted:'वोट हुआ। यह निगम की सूची में ऊपर गया।',by:'{n} द्वारा',you:'आप',
+}});
+const NR={step:'pick',cat:'drain',area:'',text:'',img:null,how:'',ai:0,last:null};
+const stPill=s=>`<span class="pill ${['bad','bad','warn','good'][s]}">${t(['pNew','pSeen','pFix','pDone'][s])}</span>`;
+const tracker=r=>`<div class="track">${STAGES.map((s,i)=>`<div class="st ${i<=r.st?'done':''} ${i===r.st?'now':''}"><i></i>${esc(L(s))}</div>`).join('')}</div>`;
+function postCard(r,o={}){
+  const open=commentsOpen(r),mineC=r.cm.filter(c=>c.me).length,ex=S.openC===r.id;
+  return`<article class="card post" id="post-${r.id}">${r.rep?`<div class="eyebrow">${ico('repost').replace('<svg','<svg width="13" height="13" style="vertical-align:-2px"')} ${t('repostedBy')}${r.repNote?': “'+esc(r.repNote)+'”':''}</div>`:''}
+   <div class="row between wrap"><span class="pill mute">${esc(L(CAT[r.cat].n))}</span><span class="row" style="gap:6px">${stPill(r.st)}<span class="faint num" style="font-size:.75rem">${r.id}</span></span></div>
+   <h3 class="h3">${esc(L(r.title))}</h3>
+   <div class="faint" style="font-size:.8rem">${esc(areaName(r.area))} · ${wardOf(r.area)} · ${ago(r.created)} · ${r.mine?t('you'):t('by',{n:r.by})}</div>
+   ${r.img?`<img src="${r.img}" alt="" style="border-radius:14px;max-height:180px;object-fit:cover;width:100%">`:''}
+   ${o.mine?tracker(r):''}
+   ${o.mine&&r.upd.length?`<details ${o.open?'open':''}><summary style="cursor:pointer;font-weight:700;font-size:.9rem">${t('updates')} (${r.upd.length})</summary><div class="stack" style="gap:6px;margin-top:8px">${r.upd.map(u=>`<div class="cmt city">${esc(L(u))}</div>`).join('')}</div></details>`:''}
+   <div class="acts"><button class="act ${r.upv?'on':''}" data-act="upv" data-id="${r.id}" type="button" aria-pressed="${r.upv}">${ico('up')}<span class="num">${r.votes}</span></button>
+    <button class="act" data-act="cmts" data-id="${r.id}" type="button" aria-expanded="${ex}">${ico('chat')}<span class="num">${r.cm.length}</span></button>
+    <button class="act ${r.rep?'on':''}" data-act="repost" data-id="${r.id}" type="button">${ico('repost')}<span class="num">${r.reposts}</span></button>
+    <button class="act" data-act="share" data-id="${r.id}" type="button" aria-label="${t('share')}">${ico('share')}</button>
+    ${o.mine&&r.st<3?`<button class="act" data-act="nextstep" data-id="${r.id}" type="button">${t('nextStep')}</button>`:''}
+    ${o.mine?`<button class="act" data-act="showmap" data-id="${r.id}" type="button">${ico('pin')}${t('showMap')}</button>`:''}</div>
+   <div class="faint" style="font-size:.78rem">${open?`${ico('clock').replace('<svg','<svg width="13" height="13" style="display:inline;vertical-align:-2px"')} ${t('closeIn')} <b class="timer" data-until="${r.closes}">${fmtLeft(r.closes-Date.now())}</b>`:t('closed')}</div>
+   ${ex?`<div class="stack" style="gap:8px">${r.cm.map(c=>`<div class="cmt ${c.city?'city':''}"><b>${esc(c.me?t('you'):c.w)}</b> <span class="faint" style="font-size:.75rem">${ago(c.ts)}</span><div>${esc(L(c.t))}</div></div>`).join('')}
+    ${open?(mineC<2?`<form class="row" data-form="cmt" data-id="${r.id}"><input class="field" name="c" maxlength="200" placeholder="${esc(t('addCmt'))}" aria-label="${esc(t('addCmt'))}" required><button class="btn primary" type="submit">${t('post')}</button></form>`:`<p class="faint">${t('limitHit')}</p>`):''}</div>`:''}
+  </article>`;
+}
+function fixChart(){const D=sim();return chHBars(D.fix.map(f=>({l:L(CAT[f.k].n),v:f.d,txt:t('days',{n:f.d}),cls:f.d>4.5?'bad':f.d>2.5?'sun':''})))}
+PAGES.report=function(){
+  const tab=S.tab.report||'new',tabs=[['new','newRep'],['mine','myRep'],['feed','hood']];
+  let body='';
+  if(tab==='new')body=newReportHTML();
+  if(tab==='mine'){
+    const mine=live().filter(r=>r.mine),f=S.rf||'all',q=(S.rq||'').toLowerCase();
+    const list=mine.filter(r=>(f==='all'||(f==='active'?r.st<3:r.st===3))&&(!q||r.id.toLowerCase().includes(q)||L(r.title).toLowerCase().includes(q)));
+    body=`<div class="g2"><section class="card brand"><div class="eyebrow">${t('myRep')}</div><div class="g4" style="grid-template-columns:repeat(3,1fr);margin-top:12px">${[['sentN',mine.length],['workN',mine.filter(r=>r.st>0&&r.st<3).length],['fixedN',mine.filter(r=>r.st===3).length]].map(([k,v])=>`<div class="kpi"><b>${v}</b><span class="muted" style="font-size:.8rem">${t(k)}</span></div>`).join('')}</div></section>
+     <section class="card"><h2 class="h2" style="margin-bottom:10px">${t('fixFast')}</h2>${fixChart()}<p class="cap">${t('fixCap')}</p></section></div>
+     <div class="row wrap"><div class="seg">${[['all','all'],['active','active'],['fixed','fixedF']].map(([k,l])=>`<button aria-selected="${f===k}" data-act="rf" data-k="${k}" type="button">${t(l)}</button>`).join('')}</div><input class="field grow" id="rq" type="search" style="min-width:180px" value="${esc(S.rq||'')}" placeholder="${esc(t('searchRep'))}" aria-label="${esc(t('searchRep'))}"></div>
+     <div class="g2" id="minelist">${list.map(r=>postCard(r,{mine:true,open:r.id===NR.last})).join('')||`<p class="muted">${t('noRep')}</p>`}</div>`;
+  }
+  if(tab==='feed'){
+    const sort=S.fs||'top',all=live().slice().sort((a,b)=>(b.rep-a.rep)||(sort==='top'?b.votes-a.votes:b.created-a.created));
+    const D=sim(),open=live().filter(r=>r.st<3).length,wk=live().filter(r=>r.st===3).length+11;
+    body=`<div class="g4">${[['sumOpen',open],['sumWeek',wk],['sumAvg',(D.fix.reduce((a,f)=>a+f.d,0)/D.fix.length).toFixed(1)],['sumYou',live().filter(r=>r.upv).length]].map(([k,v])=>`<div class="card kpi"><b class="num">${v}</b><span class="muted" style="font-size:.85rem">${t(k)}</span></div>`).join('')}</div>
+     <div class="g2"><section class="card"><h2 class="h2" style="margin-bottom:10px">${t('probMap')}</h2><div class="mapwrap" id="feedmap">${cityMap({pins:all.slice(0,8).map((r,i)=>({x:r.x,y:r.y,st:r.st,n:i+1,label:L(r.title),id:r.id}))})}</div>
+      <div class="legend"><span><i style="background:var(--bad)"></i>${t('pNew')}</span><span><i style="background:var(--sun)"></i>${t('pFix')}</span><span><i style="background:var(--leaf)"></i>${t('pDone')}</span></div></section>
+      <section class="card"><h2 class="h2" style="margin-bottom:10px">${t('fixFast')}</h2>${fixChart()}<p class="cap">${t('fixCap')}</p><p class="cap">${t('commentRule')}</p></section></div>
+     <div class="seg" style="max-width:320px">${[['top','top'],['new','latest']].map(([k,l])=>`<button aria-selected="${sort===k}" data-act="fs" data-k="${k}" type="button">${t(l)}</button>`).join('')}</div>
+     <div class="g2">${all.map(r=>postCard(r)).join('')}</div>`;
+  }
+  return`<div class="stack"><h1 class="h1" style="font-size:clamp(1.9rem,6vw,2.6rem)">${t('report')}</h1><div class="seg" role="tablist" style="max-width:520px">${tabs.map(([k,l])=>`<button role="tab" aria-selected="${tab===k}" data-act="rtab" data-k="${k}" type="button">${t(l)}</button>`).join('')}</div>${body}</div>`;
+};
+function newReportHTML(){
+  const c=city();
+  if(NR.step==='pick')return`<div class="g2"><section class="card"><h2 class="h2">${t('startHow')}</h2><div class="stack" style="gap:10px;margin-top:14px">
+   ${[['speak','mic','speak','speakD'],['photo','camera','photo','photoD'],['type','report','typeIt','typeD']].map(([k,i,a,b])=>`<button class="li card flat" style="width:100%;text-align:left;padding:14px" data-act="nr-how" data-k="${k}" type="button"><span class="ic" style="background:${k==='speak'?'var(--badsoft);color:var(--bad)':k==='photo'?'var(--infosoft);color:var(--info)':'var(--leafsoft);color:var(--leaf)'}">${ico(i)}</span><span class="grow"><b style="font-size:1.05rem">${t(a)}</b><br><span class="faint">${t(b)}</span></span>${ico('arrow').replace('<svg','<svg width="20" height="20"')}</button>`).join('')}
+   <input type="file" id="nrfile" accept="image/*" capture="environment" hidden></div></section>
+   <section class="card"><h2 class="h2" style="margin-bottom:10px">${t('fixFast')}</h2>${fixChart()}<p class="cap">${t('fixCap')}</p></section></div>`;
+  if(NR.step==='listen')return`<section class="card" style="text-align:center;padding:40px 18px"><div class="wave" style="justify-content:center">${[...Array(14)].map((_,i)=>`<i style="animation-delay:${i*60}ms"></i>`).join('')}</div><p class="h3" style="margin-top:16px">${t('listening')}</p><p class="faint" style="margin-top:6px">${t('voiceDemo')}</p></section>`;
+  if(NR.step==='sent'){const r=live().find(x=>x.id===NR.last);return`<section class="card brand" style="text-align:center;padding:34px 20px"><div style="width:64px;height:64px;border-radius:50%;background:var(--sun);color:#2A1D00;display:grid;place-items:center;margin:0 auto">${ico('check').replace('<svg','<svg width="32" height="32"')}</div><h2 class="h1" style="margin-top:14px;font-size:2.2rem">${t('sent')}</h2><p style="margin-top:8px">${t('sentSub',{id:NR.last,body:esc(c.body)})}</p>${r?`<div style="background:var(--surface);color:var(--ink);border-radius:16px;padding:12px;margin-top:16px">${tracker(r)}</div>`:''}<div class="row wrap" style="justify-content:center;margin-top:16px"><button class="btn sun" data-act="nr-track" type="button">${t('trackIt')}</button><button class="btn onbrand" data-act="nr-reset" type="button">${t('another')}</button></div></section>`}
+  return`<form class="card stack" data-form="report"><div class="row between"><h2 class="h2">${t('newRep')}</h2><button class="btn sm ghost" type="button" data-act="nr-reset">${t('back')}</button></div>
+   ${NR.how==='speak'?`<div class="cmt"><b>${t('heard')}</b><div>“${esc(NR.text)}”</div></div>`:''}
+   ${NR.img?`<img src="${NR.img}" alt="" style="border-radius:14px;max-height:220px;object-fit:cover;width:100%">`:''}
+   ${NR.ai?`<span class="pill info">${ico('spark').replace('<svg','<svg width="13" height="13"')} ${t('aiGuess',{c:esc(L(CAT[NR.cat].n)),n:NR.ai})}</span>`:''}
+   <div><div class="eyebrow" style="margin-bottom:8px">${t('what')}</div><div class="row wrap" style="gap:8px">${Object.keys(CAT).map(k=>`<button class="chip" aria-pressed="${NR.cat===k}" data-act="nr-cat" data-k="${k}" type="button">${esc(L(CAT[k].n))}</button>`).join('')}</div></div>
+   <label><div class="eyebrow" style="margin-bottom:8px">${t('where')}</div><select class="field" name="area" id="nrarea">${c.areas.map(a=>`<option ${a===(NR.area||curArea())?'selected':''} value="${esc(a)}">${esc(areaName(a))}</option>`).join('')}</select></label>
+   <label><div class="eyebrow" style="margin-bottom:8px">${t('details')}</div><textarea class="field" name="text" id="nrtext" maxlength="300" placeholder="${esc(t('detailsPh'))}">${esc(NR.how==='speak'?'':NR.text)}</textarea></label>
+   <p class="cap">${t('commentRule')}</p><button class="btn primary full" type="submit">${ico('send').replace('<svg','<svg width="18" height="18"')}${t('sendRep')}</button></form>`;
+}
+AFTER.report=()=>{};
+const findR=id=>reports().find(r=>r.id===id);
+Object.assign(ACT,{
+ rtab:el=>{S.tab.report=el.dataset.k;render(true)},rf:el=>{S.rf=el.dataset.k;render(true)},fs:el=>{S.fs=el.dataset.k;render(true)},
+ 'nr-how':el=>{NR.how=el.dataset.k;NR.img=null;NR.ai=0;
+   if(NR.how==='photo'){const f=$('#nrfile');f.onchange=()=>{const file=f.files[0];if(!file)return;const rd=new FileReader();rd.onload=()=>{NR.img=rd.result;NR.cat='pothole';NR.ai=92;NR.step='form';render(true)};rd.readAsDataURL(file)};f.click();return}
+   if(NR.how==='speak'){NR.step='listen';render(true);setTimeout(()=>{NR.text=S.lang==='hi'?`${areaName(curArea())} में स्कूल के पास नाली सुबह से उफान पर है, बदबू आ रही है।`:`The drain near the school in ${curArea()} has been overflowing since morning and it smells.`;NR.cat='drain';NR.ai=88;NR.step='form';if(S.page==='report')render(true)},2600);return}
+   NR.step='form';render(true)},
+ 'nr-cat':el=>{NR.cat=el.dataset.k;$$('[data-act="nr-cat"]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===NR.cat))},
+ 'nr-reset':()=>{Object.assign(NR,{step:'pick',img:null,ai:0,text:'',how:''});render(true)},
+ 'nr-track':()=>{S.tab.report='mine';NR.step='pick';render();window.scrollTo({top:0})},
+ upv:el=>{const r=findR(el.dataset.id);r.upv=!r.upv;r.votes+=r.upv?1:-1;if(r.upv)toast(t('upvoted'));render(true)},
+ cmts:el=>{S.openC=S.openC===el.dataset.id?null:el.dataset.id;render(true)},
+ nextstep:el=>{const r=findR(el.dataset.id);if(r.st<3){r.st++;r.upd.push([{en:'Complaint seen by '+city().body+'.',hi:'शिकायत '+city().body+' ने देखी।'},{en:'A crew has been assigned.',hi:'टीम भेज दी गई है।'},{en:'Fixed. Thank you for reporting.',hi:'ठीक हो गया। बताने के लिए धन्यवाद।'}][r.st-1]);if(r.st===3)r.after=true}NR.last=r.id;render(true)},
+ showmap:el=>{const r=findR(el.dataset.id);openSheet(`<h2 class="h2" style="margin-bottom:10px">${esc(L(r.title))}</h2><div class="mapwrap">${cityMap({pins:[{x:r.x,y:r.y,st:r.st,n:1,label:L(r.title)}]})}</div><a class="btn ghost full" style="margin-top:12px;text-decoration:none" target="_blank" rel="noopener" href="${mapsUrl(r.area+', '+city().n.en)}">${t('openMaps')}</a><button class="btn primary full" style="margin-top:8px" data-act="sheet-close" type="button">${t('close')}</button>`)},
+ repost:el=>{const r=findR(el.dataset.id);openSheet(`<h2 class="h2">${t('repostTitle')}</h2><p class="muted" style="margin:6px 0 12px">${esc(L(r.title))}</p><form data-form="repost" data-id="${r.id}" class="stack" style="gap:10px"><input class="field" name="n" maxlength="120" placeholder="${esc(t('repostPh'))}"><button class="btn primary full" type="submit">${ico('repost').replace('<svg','<svg width="18" height="18"')}${t('repostBtn')}</button></form>`)},
+ share:el=>{const r=findR(el.dataset.id),msg=`${L(r.title)} (${r.id}) · ${r.votes} ▲ — ${S.lang==='hi'?'स्पंदन पर वोट करें':'Upvote it on Spandan'}, ${cname()}`;
+   openSheet(`<h2 class="h2" style="margin-bottom:10px">${t('shareTitle')}</h2><div class="cmt" id="sharetxt" style="user-select:all">${esc(msg)}</div><div class="g4" style="margin-top:12px;grid-template-columns:repeat(3,1fr)">
+   <a class="btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msg)}">${t('wa')}</a><a class="btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(msg)}">${t('x')}</a>
+   <button class="btn primary" data-act="copy" type="button">${ico('copy').replace('<svg','<svg width="16" height="16"')}${t('copy')}</button></div>`)},
+ copy:()=>{const txt=$('#sharetxt').textContent;try{navigator.clipboard.writeText(txt).then(()=>toast(t('copied')),()=>{selTxt();toast(t('copyFail'))})}catch(e){selTxt();toast(t('copyFail'))}},
+});
+function selTxt(){const r=document.createRange();r.selectNodeContents($('#sharetxt'));const s=getSelection();s.removeAllRanges();s.addRange(r)}
+document.addEventListener('input',e=>{if(e.target.id==='rq'){S.rq=e.target.value;const p=e.target.selectionStart;render(true);const n=$('#rq');n.focus();n.setSelectionRange(p,p)}});
+document.addEventListener('submit',e=>{
+  const f=e.target,k=f.dataset.form;if(!k)return;e.preventDefault();
+  if(k==='cmt'){const r=findR(f.dataset.id),v=f.c.value.trim();if(!v||!commentsOpen(r))return;r.cm.push({w:'You',me:true,t:v.slice(0,200),ts:Date.now()});render(true)}
+  if(k==='repost'){const r=findR(f.dataset.id);r.rep=true;r.repNote=f.n.value.trim();r.reposts++;closeSheet();toast(t('reposted',{area:areaName(curArea())}));render(true)}
+  if(k==='report'){const c=city(),now=Date.now(),a=$('#nrarea').value,txt=($('#nrtext').value.trim()||NR.text||'').slice(0,300),id='SP-'+(2200+reports().length);
+    const title=txt?{en:txt.length>70?txt.slice(0,68)+'…':txt}:{en:TITLES[NR.cat].en.replace('{a}',a),hi:TITLES[NR.cat].hi.replace('{a}',AREA_HI[a]||a)};
+    reports().unshift({id,cat:NR.cat,area:a,title,x:120+Math.round(Math.random()*160),y:70+Math.round(Math.random()*120),votes:1,upv:true,st:0,created:now,closes:now+24*3600e3,reposts:0,rep:false,by:'You',mine:true,cm:[],upd:[],img:NR.img,after:false,removed:false,note:''});
+    NR.last=id;NR.step='sent';render(true);window.scrollTo({top:0,behavior:'smooth'})}
+});
+/* ====== Future City ====== */
+addI({en:{
+ futH:'Your city in 2030',futSub:'Pick three choices. The bars show today against your plan.',fSolar:'Solar on rooftops',fBus:'Buses on main roads',fSort:'Homes sorting waste',
+ o_none:'Same as now',o_some:'Some more',o_lots:'A lot more',score2030:'2030 score',rClean:'Power from clean sources',rAir:'Air quality (AQI, lower is better)',rLand:'Garbage to landfill',rTime:'Average trip to work',
+ todayL:'Today',planL:'Your plan',support:'Support this plan',supported:'You and {n} others support a plan like this.',futCap:'Estimates from a simple city model. Real results depend on funding and timing.',
+},hi:{
+ futH:'2030 में आपका शहर',futSub:'तीन चुनाव करें। बार आज और आपकी योजना की तुलना दिखाते हैं।',fSolar:'छतों पर सोलर',fBus:'मुख्य सड़कों पर बसें',fSort:'कचरा छाँटने वाले घर',
+ o_none:'अभी जैसा',o_some:'थोड़ा ज़्यादा',o_lots:'बहुत ज़्यादा',score2030:'2030 स्कोर',rClean:'साफ़ स्रोतों से बिजली',rAir:'हवा (AQI, कम बेहतर)',rLand:'लैंडफ़िल में कचरा',rTime:'काम तक औसत सफ़र',
+ todayL:'आज',planL:'आपकी योजना',support:'इस योजना का समर्थन करें',supported:'आप और {n} लोग ऐसी योजना के साथ हैं।',futCap:'एक सरल शहर मॉडल का अनुमान। असली नतीजे बजट और समय पर निर्भर हैं।',
+}});
+S.fut=S.fut||{solar:1,bus:1,sort:1};
+function futCalc(){const D=sim(),f=S.fut,c=city(),tt=leaveAt().mine;
+  const rows=[{k:'rClean',a:31,b:31+f.solar*17+f.bus*2,u:'%',max:100,good:'up'},{k:'rAir',a:D.aqi,b:Math.round(D.aqi*(1-f.bus*.11-f.solar*.04-f.sort*.03)),u:'',max:Math.max(D.aqi,150),good:'down'},
+   {k:'rLand',a:22,b:Math.max(4,22-f.sort*7),u:'%',max:30,good:'down'},{k:'rTime',a:tt,b:Math.round(tt*(1-f.bus*.12)),u:' min',max:Math.max(tt,40),good:'down'}];
+  const sc=clamp(Math.round(D.score+f.solar*5+f.bus*5+f.sort*4),0,99);return{rows,sc}}
+PAGES.future=function(){
+  const{rows,sc}=futCalc(),n=store.get('support',0),opts=['o_none','o_some','o_lots'];
+  return`<div class="stack"><div><h1 class="h1" style="font-size:clamp(1.9rem,6vw,2.6rem)">${t('futH')}</h1><p class="muted" style="margin-top:6px">${t('futSub')}</p></div>
+  <div class="g2"><section class="card stack">${[['solar','fSolar','sun'],['bus','fBus','bus'],['sort','fSort','waste']].map(([k,l,i])=>`<div><div class="row" style="margin-bottom:8px">${ico(i).replace('<svg','<svg width="20" height="20"')}<b>${t(l)}</b></div><div class="seg">${opts.map((o,j)=>`<button aria-selected="${S.fut[k]===j}" data-act="fut" data-k="${k}" data-v="${j}" type="button">${t(o)}</button>`).join('')}</div></div>`).join('')}</section>
+   <section class="card brand"><div class="eyebrow">${t('score2030')} · ${esc(cname())}</div><div class="row" style="align-items:flex-end;gap:10px;margin-top:8px"><span class="big num" id="fsc" style="font-size:4rem">${sc}</span><span class="muted" style="margin-bottom:10px">/100 · ${t('todayL')} ${sim().score}</span></div>
+    <div class="bar" style="margin-top:10px;height:12px"><i id="fscb" style="width:${sc}%"></i></div>
+    <button class="btn sun" style="margin-top:18px" data-act="support" type="button">${ico('users').replace('<svg','<svg width="18" height="18"')}${t('support')}</button><p class="cap" style="color:var(--onbrand2)" id="supn">${n?t('supported',{n:1200+n}):''}</p></section></div>
+  <section class="card"><div class="g2" id="futrows">${rows.map((r,i)=>`<div><b>${t(r.k)}</b><div class="stack" style="gap:6px;margin-top:10px">
+    <div class="row"><span style="width:84px;font-size:.8rem" class="faint">${t('todayL')}</span><div class="bar grow" style="height:14px"><i style="width:${r.a/r.max*100}%;background:var(--ink3)"></i></div><b class="num" style="width:62px;text-align:right">${r.a}${r.u}</b></div>
+    <div class="row"><span style="width:84px;font-size:.8rem" class="faint">${t('planL')}</span><div class="bar grow" style="height:14px"><i data-fb="${i}" style="width:${r.b/r.max*100}%"></i></div><b class="num" data-fv="${i}" style="width:62px;text-align:right;color:var(--leaf)">${r.b}${r.u}</b></div></div></div>`).join('')}</div>
+   <p class="cap" style="margin-top:14px">${t('futCap')}</p></section></div>`;
+};
+ACT.fut=el=>{S.fut[el.dataset.k]=+el.dataset.v;$$(`[data-act="fut"][data-k="${el.dataset.k}"]`).forEach(b=>b.setAttribute('aria-selected',b===el));const{rows,sc}=futCalc();
+  rows.forEach((r,i)=>{$(`[data-fb="${i}"]`).style.width=r.b/r.max*100+'%';$(`[data-fv="${i}"]`).textContent=r.b+r.u});$('#fsc').textContent=sc;$('#fscb').style.width=sc+'%';save()};
+ACT.support=()=>{const n=store.get('support',0)+1;store.set('support',n);$('#supn').textContent=t('supported',{n:1200+n});toast(t('supported',{n:1200+n}))};
+
+/* ====== City officer console (Nagar Nigam) ====== */
+addI({en:{
+ offLogin:'City officer login',offId:'Officer ID',offPin:'PIN',offDemo:'Demo: officer id “nigam”, PIN 1234.',signIn:'Sign in',badPin:'That ID or PIN is wrong. Try nigam and 1234.',
+ howRank:'How the list is ranked',howRankTxt:'Rank = upvotes per 10,000 people in that ward × how urgent the problem is × days waiting. A small ward with many upvotes is not drowned out by a big one.',
+ per10k:'{n} per 10k residents',sla:'Due in',overdue:'Overdue',markSeen:'Mark seen',startWork:'Start work',resolve:'Resolve',remove:'Remove',
+ resolveT:'Resolve {id}',resolveNote:'What was done?',resolvePh:'e.g. Drain cleared, silt removed, area washed.',afterPhoto:'After photo attached (demo)',confirmRes:'Mark as fixed',resolved:'{id} marked fixed. The citizen has been told.',
+ removeT:'Remove {id}?',removeWhy:'Pick a reason. The citizen sees it.',rDup:'Duplicate of another report',rNot:'Not a city matter',rDone:'Already fixed',rAbuse:'Abusive or fake',removed:'{id} removed.',undo:'Undo',
+ kOpen:'Open',kAvg:'Avg. days to fix',kSla:'Within time',kWeek:'Fixed this week',byCat:'Open reports by type',aiCluster:'AI grouping',wards:'Wards by upvotes per 10k',
+ st_new:'New',noneLeft:'Nothing waiting. Good work.',cityReply:'City reply',
+},hi:{
+ offLogin:'नगर अधिकारी लॉगिन',offId:'अधिकारी ID',offPin:'पिन',offDemo:'डेमो: ID “nigam”, पिन 1234।',signIn:'लॉगिन करें',badPin:'ID या पिन ग़लत है। nigam और 1234 आज़माएँ।',
+ howRank:'सूची कैसे बनती है',howRankTxt:'रैंक = वार्ड के हर 10,000 लोगों पर वोट × समस्या कितनी ज़रूरी × कितने दिन से रुकी। छोटे वार्ड की आवाज़ बड़े वार्ड में नहीं दबती।',
+ per10k:'हर 10 हज़ार पर {n}',sla:'बाकी समय',overdue:'समय निकल गया',markSeen:'देख लिया',startWork:'काम शुरू',resolve:'ठीक हुआ',remove:'हटाएँ',
+ resolveT:'{id} ठीक करें',resolveNote:'क्या किया गया?',resolvePh:'जैसे: नाली साफ़ की, गाद हटाई।',afterPhoto:'बाद की फ़ोटो लगी (डेमो)',confirmRes:'ठीक हुआ मार्क करें',resolved:'{id} ठीक हुआ। नागरिक को बता दिया गया।',
+ removeT:'{id} हटाएँ?',removeWhy:'कारण चुनें। नागरिक को दिखेगा।',rDup:'दूसरी शिकायत जैसी',rNot:'निगम का मामला नहीं',rDone:'पहले से ठीक',rAbuse:'अपमानजनक या झूठी',removed:'{id} हटाई गई।',undo:'वापस लें',
+ kOpen:'खुली',kAvg:'ठीक होने में औसत दिन',kSla:'समय पर',kWeek:'इस हफ़्ते ठीक',byCat:'प्रकार के हिसाब से खुली शिकायतें',aiCluster:'AI समूह',wards:'हर 10 हज़ार पर वोट, वार्ड अनुसार',
+ st_new:'नई',noneLeft:'कुछ बाकी नहीं। बढ़िया।',cityReply:'निगम का जवाब',
+}});
+function slaLeft(r){return r.created+CAT[r.cat].days*864e5-Date.now()}
+PAGES.manager=function(){
+  const tab=S.tab.mgr||'queue',q=queue(),D=sim();
+  if(tab==='queue'){const f=S.mf||'all',list=q.filter(r=>f==='all'||STKEYS[r.st]===f);
+    return`<div class="stack"><div><h1 class="h1" style="font-size:clamp(1.8rem,6vw,2.5rem)">${t('queue')} · ${esc(city().body)}</h1></div>
+    <section class="card sun"><b>${t('howRank')}</b><p style="margin-top:4px;font-size:.92rem">${t('howRankTxt')}</p></section>
+    <div class="chips">${['all','new','seen','fixing'].map(k=>`<button class="chip" aria-pressed="${f===k}" data-act="mf" data-k="${k}" type="button">${k==='all'?t('all'):t(['pNew','pSeen','pFix'][STKEYS.indexOf(k)])} · ${k==='all'?q.length:q.filter(r=>STKEYS[r.st]===k).length}</button>`).join('')}</div>
+    <div class="stack" style="gap:12px">${list.map(r=>{const rank=q.indexOf(r)+1,p=Math.round(r.votes/wardPop(r.area)*1e4),sl=slaLeft(r),pr=priority(r),mx=priority(q[0]);
+      return`<article class="card"><div class="row" style="align-items:flex-start;gap:12px"><span class="rank">${rank}</span><div class="grow"><div class="row between wrap"><b>${esc(L(r.title))}</b>${stPill(r.st)}</div>
+       <div class="faint" style="font-size:.8rem;margin-top:2px">${r.id} · ${esc(L(CAT[r.cat].n))} · ${esc(areaName(r.area))}, ${wardOf(r.area)} · ${ago(r.created)}</div>
+       <div class="row wrap" style="gap:14px;margin-top:10px;font-size:.85rem"><span><b class="num">${r.votes}</b> ▲</span><span class="pill info">${t('per10k',{n:p})}</span><span class="pill ${sl<0?'bad':'mute'}">${sl<0?t('overdue'):t('sla')+' '+fmtLeft(sl)}</span></div>
+       <div class="bar" style="margin-top:10px"><i style="width:${pr/mx*100}%"></i></div>
+       <div class="row wrap" style="margin-top:12px;gap:8px">${r.st===0?`<button class="btn sm" data-act="m-st" data-id="${r.id}" data-v="1" type="button">${t('markSeen')}</button>`:''}${r.st<2?`<button class="btn sm" data-act="m-st" data-id="${r.id}" data-v="2" type="button">${t('startWork')}</button>`:''}
+        <button class="btn sm primary" data-act="m-res" data-id="${r.id}" type="button">${ico('check').replace('<svg','<svg width="16" height="16"')}${t('resolve')}</button><button class="btn sm danger" data-act="m-rem" data-id="${r.id}" type="button">${ico('trash').replace('<svg','<svg width="16" height="16"')}${t('remove')}</button></div></div></div></article>`}).join('')||`<p class="muted">${t('noneLeft')}</p>`}</div></div>`}
+  if(tab==='mapv'){const all=live();return`<div class="stack"><h1 class="h1" style="font-size:clamp(1.8rem,6vw,2.5rem)">${t('mapv')}</h1><section class="card"><div class="mapwrap">${cityMap({you:false,pins:all.map((r,i)=>({x:r.x,y:r.y,st:r.st,n:i+1,label:L(r.title)}))})}</div><div class="legend"><span><i style="background:var(--bad)"></i>${t('pNew')}</span><span><i style="background:var(--sun)"></i>${t('pFix')}</span><span><i style="background:var(--leaf)"></i>${t('pDone')}</span></div>
+    <div class="list" style="margin-top:8px">${all.map((r,i)=>`<div class="li"><span class="numpin ${['nb-new','nb-new','nb-doing','nb-fix'][r.st]}">${i+1}</span><span class="grow">${esc(L(r.title))}</span><span class="faint num" style="font-size:.8rem">${r.votes} ▲</span></div>`).join('')}</div></section></div>`}
+  const open=q.length,cats=Object.keys(CAT).map(k=>({l:L(CAT[k].n),v:q.filter(r=>r.cat===k).length})).filter(x=>x.v);
+  const wards={};live().forEach(r=>{const w=wardOf(r.area);wards[w]=wards[w]||{v:0,pop:wardPop(r.area),a:r.area};wards[w].v+=r.votes});
+  const drains=q.filter(r=>r.cat==='drain'||r.cat==='leak');
+  return`<div class="stack"><h1 class="h1" style="font-size:clamp(1.8rem,6vw,2.5rem)">${t('insights')}</h1>
+   <div class="g4">${[['kOpen',open],['kAvg',(D.fix.reduce((a,f)=>a+f.d,0)/D.fix.length).toFixed(1)],['kSla',Math.round(q.filter(r=>slaLeft(r)>0).length/Math.max(1,open)*100)+'%'],['kWeek',live().filter(r=>r.st===3).length+11]].map(([k,v])=>`<div class="card kpi"><b class="num">${v}</b><span class="muted" style="font-size:.85rem">${t(k)}</span></div>`).join('')}</div>
+   <div class="g2"><section class="card"><h2 class="h2" style="margin-bottom:10px">${t('byCat')}</h2>${chHBars(cats.map(c=>({l:c.l,v:c.v,txt:String(c.v)})))}</section>
+    <section class="card brand"><div class="eyebrow">${ico('spark').replace('<svg','<svg width="14" height="14" style="display:inline;vertical-align:-2px"')} ${t('aiCluster')}</div><p style="margin-top:8px;font-size:1.05rem">${S.lang==='hi'?`${drains.length} पानी/नाली शिकायतें ${esc(areaName(drains[0]?drains[0].area:curArea()))} के आसपास हैं। शायद एक ही रुकावट है। एक टीम भेजें और सब एक साथ बंद करें।`:`${drains.length} water and drain reports sit close together near ${esc(drains[0]?drains[0].area:curArea())}. It is likely one blockage. Send one crew and close them together.`}</p><p class="cap" style="color:var(--onbrand2)">${t('aiNote')}</p></section></div>
+   <section class="card"><h2 class="h2" style="margin-bottom:10px">${t('wards')}</h2>${chHBars(Object.entries(wards).map(([w,o])=>({l:w+' · '+areaName(o.a),v:Math.round(o.v/o.pop*1e4),txt:String(Math.round(o.v/o.pop*1e4))})).sort((a,b)=>b.v-a.v))}</section></div>`;
+};
+let lastRemoved=null;
+Object.assign(ACT,{
+ officer:()=>openSheet(`<h2 class="h2">${t('offLogin')}</h2><p class="cap">${t('offDemo')}</p><form data-form="login" class="stack" style="gap:10px;margin-top:12px"><input class="field" id="offid" name="id" value="nigam" autocomplete="username" aria-label="${t('offId')}" placeholder="${t('offId')}"><input class="field" id="offpin" name="pin" type="password" inputmode="numeric" value="1234" autocomplete="current-password" aria-label="${t('offPin')}" placeholder="${t('offPin')}"><p class="cap" id="loginerr" style="color:var(--bad)"></p><button class="btn primary full" type="submit">${ico('lock').replace('<svg','<svg width="18" height="18"')}${t('signIn')}</button></form>`),
+ mf:el=>{S.mf=el.dataset.k;render(true)},
+ 'm-st':el=>{const r=findR(el.dataset.id);r.st=+el.dataset.v;r.upd.push(r.st===1?{en:'Complaint seen by '+city().body+'.',hi:'शिकायत '+city().body+' ने देखी।'}:{en:'A crew has been assigned.',hi:'टीम भेज दी गई है।'});render(true)},
+ 'm-res':el=>{const r=findR(el.dataset.id);openSheet(`<h2 class="h2">${t('resolveT',{id:r.id})}</h2><p class="muted" style="margin:4px 0 12px">${esc(L(r.title))}</p><form data-form="resolve" data-id="${r.id}" class="stack" style="gap:10px"><label><div class="eyebrow" style="margin-bottom:6px">${t('resolveNote')}</div><textarea class="field" name="note" required placeholder="${esc(t('resolvePh'))}"></textarea></label><label class="row"><input type="checkbox" name="ph" checked> ${t('afterPhoto')}</label><button class="btn primary full" type="submit">${t('confirmRes')}</button></form>`)},
+ 'm-rem':el=>{const r=findR(el.dataset.id);openSheet(`<h2 class="h2">${t('removeT',{id:r.id})}</h2><p class="cap">${t('removeWhy')}</p><div class="stack" style="gap:8px;margin-top:12px">${['rDup','rNot','rDone','rAbuse'].map(k=>`<button class="btn ghost full" style="justify-content:flex-start" data-act="m-remgo" data-id="${r.id}" data-k="${k}" type="button">${t(k)}</button>`).join('')}</div>`)},
+ 'm-remgo':el=>{const r=findR(el.dataset.id);r.removed=true;r.note=t(el.dataset.k);lastRemoved=r;closeSheet();render(true);toast(t('removed',{id:r.id}),t('undo'),()=>{lastRemoved.removed=false;render(true)})},
+});
+document.addEventListener('submit',e=>{const f=e.target,k=f.dataset.form;
+  if(k==='login'){e.preventDefault();if($('#offid').value.trim().toLowerCase()==='nigam'&&$('#offpin').value==='1234'){closeSheet();S.role='manager';S.tab.mgr='queue';render();window.scrollTo({top:0})}else $('#loginerr').textContent=t('badPin')}
+  if(k==='resolve'){e.preventDefault();const r=findR(f.dataset.id),note=f.note.value.trim();r.st=3;r.after=f.ph.checked;r.closes=Date.now();r.upd.push({en:'Fixed: '+note,hi:'ठीक हुआ: '+note});r.cm.push({w:city().body,city:true,t:note,ts:Date.now()});closeSheet();toast(t('resolved',{id:r.id}));render(true)}
+});
+/* ====== Ask Spandan (rule-based demo assistant over live city data) ====== */
+addI({en:{botHi:'Hi! I know today’s data for {city}. Ask me about garbage, water, traffic, air, power or your reports.',botNote:'Demo assistant. Answers come from the city data on this screen.',
+ botUnknown:'I am not sure yet. Try asking about garbage, water, traffic, air, power, events or how to report a problem.'},
+ hi:{botHi:'नमस्ते! मेरे पास {city} का आज का डेटा है। कचरा, पानी, ट्रैफिक, हवा, बिजली या अपनी शिकायतों के बारे में पूछें।',botNote:'डेमो सहायक। जवाब इसी स्क्रीन के शहर डेटा से हैं।',
+ botUnknown:'अभी पक्का नहीं पता। कचरा, पानी, ट्रैफिक, हवा, बिजली, कार्यक्रम या शिकायत कैसे करें, यह पूछें।'}});
+const CHIPS={en:['When is the garbage van?','Is the air OK for a walk?','When should I leave for work?','Any power cut today?','How do I report a pothole?','Which bin for batteries?'],
+ hi:['कचरा गाड़ी कब आएगी?','क्या टहलने के लिए हवा ठीक है?','काम के लिए कब निकलूँ?','आज बिजली कटेगी?','गड्ढे की शिकायत कैसे करूँ?','बैटरी किस डिब्बे में?']};
+function botReply(q){
+  const D=sim(),hi=S.lang==='hi',s=q.toLowerCase(),Lv=leaveAt(),a=aqiInfo(D.aqi),ar=areaName(curArea());
+  const m=(...w)=>w.some(x=>s.includes(x));
+  if(m('bin','डिब्बा','battery','बैटरी','medicine','दवा','bottle','बोतल')){const b=BINS.find(x=>s.includes(x[0].toLowerCase().split(' ')[0].replace(/s$/,''))||s.includes(x[1].split(' ')[0]));
+    return b?(hi?`${b[1]}: ${t({wet:'wet',dry:'dry',haz:'haz',ew:'ew'}[b[2]])} डिब्बा।`:`${b[0]}: ${t({wet:'wet',dry:'dry',haz:'haz',ew:'ew'}[b[2]])} bin.`):(hi?'वह चीज़ लिखें, जैसे “बैटरी” या “बोतल”। कचरा और बिजली पेज पर पूरी सूची है।':'Name the item, like “battery” or “bottle”. The full list is on the Waste & Power page.')}
+  if(m('garbage','van','trash','waste','कचरा','गाड़ी'))return has('garbage')?(hi?`${ar} में कचरा गाड़ी आज ${fmtT(D.vanMin)} पर आएगी। पिछले हफ़्ते एक दिन (गुरुवार) 35 मिनट देर हुई थी। आने से 10 मिनट पहले हम सूचना देंगे।`:`The van reaches ${ar} at ${fmtT(D.vanMin)} today. Last week it was 35 minutes late once (Thursday). We will ping you 10 minutes before it arrives.`):t('notThere',{f:t('garbage'),city:cname()});
+  if(m('water','पानी','tank','टंकी'))return has('water')?(hi?`${ar} में पानी ${fmtT(D.waterS)} से ${fmtT(D.waterS+90)} तक। कल 40 मिनट देरी है, इसलिए आज रात टंकी भर लें।`:`Water in ${ar} runs ${fmtT(D.waterS)} to ${fmtT(D.waterS+90)}. Tomorrow starts 40 minutes late, so fill your tank tonight.`):t('notThere',{f:t('water'),city:cname()});
+  if(/\bair\b/.test(s)||m('aqi','walk','हवा','टहल','pollution','प्रदूषण')){let b=Math.max(D.nowI,6),bv=1e9;for(let i=b;i<=21;i++)if(D.aqiH[i]<bv){bv=D.aqiH[i];b=i}
+    return hi?`अभी AQI ${D.aqi} है (${a.hi})। सबसे साफ़ हवा ${fmtT(b*60)} के आसपास होगी, AQI करीब ${bv}। ${D.aqi>150?'बाहर मास्क पहनें।':''}`:`AQI is ${D.aqi} right now (${a.en}). Air is cleanest around ${fmtT(b*60)}, near ${bv}. ${D.aqi>150?'Wear a mask outside.':'A walk is fine then.'}`}
+  if(m('leave','work','traffic','office','निकल','ट्रैफिक','ऑफ़िस','काम के'))return hi?`${fmtT(Lv.dep)} पर निकलें, ${fmtT(Lv.arr)} तक पहुँचेंगे। 8:40 पर निकलने से ${Lv.saved} मिनट बचेंगे। ${city().road} पर शाम 6 बजे सबसे ज़्यादा भीड़ होती है।`:`Leave at ${fmtT(Lv.dep)} and you arrive by ${fmtT(Lv.arr)}. That is ${Lv.saved} minutes faster than leaving at 8:40. ${city().road} is busiest around 6 PM.`;
+  if(m('power','cut','बिजली','light','solar','सोलर'))return has('power')?(hi?`आज ${ar} में ${fmtT(D.cuts[0].s)} से ${fmtT(D.cuts[0].e)} तक बिजली कटेगी (${L(D.cuts[0].why)})। शहर की ${D.solarShare}% बिजली आज सूरज से है।`:`Power is off in ${ar} from ${fmtT(D.cuts[0].s)} to ${fmtT(D.cuts[0].e)} today (${L(D.cuts[0].why)}). ${D.solarShare}% of the city’s power is from the sun today.`):t('notThere',{f:t('power'),city:cname()});
+  if(m('report','complain','pothole','शिकायत','गड्ढ','drain','नाली'))return hi?'शिकायत टैब खोलें और बोलें, फ़ोटो लें या लिखें। पड़ोसी 24 घंटे वोट और टिप्पणी कर सकते हैं। ज़्यादा वोट (वार्ड की आबादी के हिसाब से) शिकायत को निगम की सूची में ऊपर ले जाते हैं।':'Open the Report tab and speak, take a photo or type. Neighbours can upvote and comment for 24 hours. More upvotes, counted against the ward’s population, move it up the city’s fix list.';
+  if(m('event','कार्यक्रम','weekend','मेला'))return D.events.map(e=>`${L(e.n)} · ${L(e.when)} · ${areaName(e.at)}`).join('\n');
+  if(m('score','स्कोर'))return hi?`${cname()} का स्कोर ${D.score}/100 है: आना-जाना ${D.parts.move}, सफ़ाई ${D.parts.clean}, पानी-बिजली ${D.parts.util}, हवा ${D.parts.air}।`:`${cname()} scores ${D.score}/100: getting around ${D.parts.move}, cleanliness ${D.parts.clean}, water & power ${D.parts.util}, air ${D.parts.air}.`;
+  if(/\b(hello|hi|hey|namaste)\b/.test(s)||s.includes('नमस्ते'))return t('botHi',{city:cname()});
+  return t('botUnknown');
+}
+const QMAP={air:{en:'Is the air OK for a walk?',hi:'क्या टहलने के लिए हवा ठीक है?'},garbage:{en:'When is the garbage van?',hi:'कचरा गाड़ी कब आएगी?'},power:{en:'Any power cut today?',hi:'आज बिजली कटेगी?'},report:{en:'How do I report a pothole?',hi:'गड्ढे की शिकायत कैसे करूँ?'}};
+let CHAT=[];
+function chatHTML(){return CHAT.map(c=>`<div class="bub ${c.me?'me':'bot'}">${c.typing?'<span class="typing"><i></i><i></i><i></i></span>':esc(c.t)}</div>`).join('')}
+function askOpen(q){
+  if(!CHAT.length)CHAT.push({t:t('botHi',{city:cname()})});
+  openSheet(`<div class="row between"><h2 class="h2">${ico('spark').replace('<svg','<svg width="22" height="22" style="display:inline;vertical-align:-4px;color:var(--sun)"')} ${t('ask')}</h2><button class="icobtn" data-act="sheet-close" type="button" aria-label="${t('close')}">${ico('x')}</button></div>
+   <div class="chatlog" id="chatlog" aria-live="polite" style="margin-top:10px">${chatHTML()}</div>
+   <div class="chips" style="margin-top:10px">${CHIPS[S.lang==='hi'?'hi':'en'].map(c=>`<button class="chip" data-act="chip" type="button">${esc(c)}</button>`).join('')}</div>
+   <form data-form="chat" class="row" style="margin-top:8px"><input class="field" id="chatq" name="q" autocomplete="off" placeholder="${esc(t('askHint'))}" aria-label="${esc(t('askHint'))}"><button class="btn primary" type="submit" aria-label="${t('send')}">${ico('send').replace('<svg','<svg width="18" height="18"')}</button></form><p class="src">${t('botNote')}</p>`,
+   ()=>{const l=$('#chatlog');l.scrollTop=l.scrollHeight});
+  if(q)botAsk(q);
+}
+function botAsk(q){CHAT.push({me:true,t:q},{typing:true});drawChat();setTimeout(()=>{CHAT.pop();CHAT.push({t:botReply(q)});drawChat()},700+Math.random()*500)}
+function drawChat(){const l=$('#chatlog');if(!l)return;l.innerHTML=chatHTML();l.scrollTop=l.scrollHeight}
+ACT.ask=()=>askOpen();ACT.chip=el=>botAsk(el.textContent);ACT['ask-q']=el=>askOpen(L(QMAP[el.dataset.q]));
+document.addEventListener('submit',e=>{if(e.target.dataset.form==='chat'){e.preventDefault();const v=e.target.q.value.trim();if(v){e.target.q.value='';botAsk(v)}}});
+
+/* ====== Notifications preview ====== */
+addI({en:{nTitle:'What you get every morning',nCap:'This is how Spandan reaches you without opening the app.',morning:'Morning summary',widget:'Home screen widget',imReady:"I'm ready",skipToday:'Skip today',
+ nPref:'You chose: {p}. Quiet hours {q}.',on:'on',off:'off',preview:'Preview tomorrow’s 7 AM note'},
+ hi:{nTitle:'हर सुबह आपको क्या मिलेगा',nCap:'ऐसे स्पंदन ऐप खोले बिना आप तक पहुँचता है।',morning:'सुबह का सारांश',widget:'होम स्क्रीन विजेट',imReady:'मैं तैयार हूँ',skipToday:'आज नहीं',
+ nPref:'आपने चुना: {p}। शांत समय {q}।',on:'चालू',off:'बंद',preview:'कल सुबह 7 बजे का संदेश देखें'}});
+ACT.bell=()=>{S.bellSeen=true;renderChrome();const D=sim(),it=dayItems().slice(0,3),d=new Date();
+  openSheet(`<div class="row between"><h2 class="h2">${t('nTitle')}</h2><button class="icobtn" data-act="sheet-close" type="button" aria-label="${t('close')}">${ico('x')}</button></div><p class="cap" style="margin-bottom:12px">${t('nCap')}</p>
+   <div class="lock"><div class="clock num">7:00</div><div class="date">${d.toLocaleDateString(S.lang==='hi'?'hi-IN':'en-IN',{weekday:'long',day:'numeric',month:'long'})}</div>
+    <div class="notif"><b>SPANDAN · ${t('morning')}</b>${esc(t(new Date().getHours()<12?'gm':'ga'))}, ${esc(cname())}. ${it.map(x=>esc(x.title)).join(' · ')}</div>
+    ${has('garbage')?`<div class="notif"><b>SPANDAN · ${t('vanTitle')}</b>${esc(t('vanAlert'))}<br><button class="nbtn" data-act="van-ready" type="button">${t('imReady')}</button><button class="nbtn" data-act="sheet-close" type="button">${t('skipToday')}</button></div>`:''}
+    <div class="widget"><div><div style="font-size:.75rem;opacity:.8">${t('cityScore')}</div><div style="font-family:var(--f-display);font-weight:800;font-size:1.8rem">${D.score}</div></div><div><div style="font-size:.75rem;opacity:.8">AQI</div><div style="font-family:var(--f-display);font-weight:800;font-size:1.8rem">${D.aqi}</div></div><div><div style="font-size:.75rem;opacity:.8">${t('garbage')}</div><div style="font-family:var(--f-display);font-weight:800;font-size:1.3rem;margin-top:6px">${fmtT(D.vanMin)}</div></div></div></div>
+   <p class="cap">${t('nPref',{p:t({morning:'mOnly',important:'impOnly',all:'everything'}[S.notif]),q:S.quiet?t('on'):t('off')})}</p>
+   <button class="btn primary full" style="margin-top:10px" data-act="previewnote" type="button">${t('preview')}</button>`)};
+ACT.previewnote=()=>{closeSheet();toast(`7:00 · ${dayItems().slice(0,3).map(x=>x.title).join(' · ')}`)};
+
+/* ====== Settings ====== */
+ACT.settings=()=>{const c=city();
+  openSheet(`<div class="row between"><h2 class="h2">${t('settings')}</h2><button class="icobtn" data-act="sheet-close" type="button" aria-label="${t('close')}">${ico('x')}</button></div>
+  <div class="stack" style="margin-top:14px">
+   <div><div class="eyebrow" style="margin-bottom:8px">${t('language')}</div><div class="row wrap" style="gap:8px">${Object.keys(LANGS).map(k=>`<button class="chip" aria-pressed="${S.lang===k}" data-act="setlang" data-l="${k}" type="button" lang="${k}">${LANGS[k].name}</button>`).join('')}</div>${FULL_LANGS.includes(S.lang)?'':`<p class="cap">${S.lang==='ta'?'தமிழ்: முக்கிய பகுதிகள் மட்டும். மீதி ஆங்கிலத்தில்.':'বাংলা: মূল অংশগুলি। বাকিটা ইংরেজিতে।'}</p>`}</div>
+   <div><div class="eyebrow" style="margin-bottom:8px">${t('theme')}</div><div class="seg">${['light','dark','system'].map(m=>`<button aria-selected="${S.theme===m}" data-act="settheme" data-m="${m}" type="button">${t(m==='system'?'auto':m)}</button>`).join('')}</div></div>
+   <div><div class="eyebrow" style="margin-bottom:8px">${t('textSize')}</div><div class="seg">${[.9,1,1.2].map(z=>`<button aria-selected="${S.textSize===z}" data-act="setsize" data-z="${z}" type="button" style="font-size:${z}rem">A</button>`).join('')}</div></div>
+   <label><div class="eyebrow" style="margin-bottom:8px">${t('city')}</div><select class="field" id="setcity">${CITIES.map(x=>`<option value="${x.id}" ${x.id===c.id?'selected':''}>${esc(L(x.n))} · ${esc(x.st)}</option>`).join('')}</select></label>
+   <label><div class="eyebrow" style="margin-bottom:8px">${t('wArea')}</div><select class="field" id="setarea">${c.areas.map(a=>`<option ${a===curArea()?'selected':''} value="${esc(a)}">${esc(areaName(a))}</option>`).join('')}</select></label>
+   <div class="row wrap"><button class="btn ghost" data-act="replay" type="button">${ico('pulse').replace('<svg','<svg width="18" height="18"')}${t('replay')}</button>${S.role==='manager'?`<button class="btn sun" data-act="nav" data-p="exit" type="button">${t('citizenView')}</button>`:`<button class="btn sun" data-act="officer" type="button">${ico('lock').replace('<svg','<svg width="18" height="18"')}${t('officer')}</button>`}</div></div>`)};
+Object.assign(ACT,{
+ setlang:el=>{S.lang=el.dataset.l;applyLang();ACT.settings()},settheme:el=>{S.theme=el.dataset.m;applyPrefs();renderChrome();$$('[data-act="settheme"]').forEach(b=>b.setAttribute('aria-selected',b===el))},
+ setsize:el=>{S.textSize=+el.dataset.z;applyPrefs();$$('[data-act="setsize"]').forEach(b=>b.setAttribute('aria-selected',b===el))},
+ replay:()=>{closeSheet();welcomeOpen()},
+});
+document.addEventListener('change',e=>{
+  if(e.target.id==='setcity'){S.city=e.target.value;S.area=city().areas[0];VAN={p:null,sim:false,alerted:false};CHAT=[];save();render(true);ACT.settings();toast(cname()+' · '+feedList(city()))}
+  if(e.target.id==='setarea'){S.area=e.target.value;save();render(true)}
+});
+
+/* ====== Boot ====== */
+(function boot(){
+  applyPrefs();
+  if(!CITIES.some(c=>c.id===S.city))S.city='bhopal';
+  render();
+  if(!S.onboarded)welcomeOpen();
+  if(location.hash==='#officer')ACT.officer();
+})();
+</script>
+</body>
+</html>
